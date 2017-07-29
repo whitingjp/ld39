@@ -187,10 +187,9 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 	}
 }
 
-void ld39_world_draw(whitgl_fmat view, whitgl_ivec setup_size)
+void ld39_world_draw(whitgl_fmat view, whitgl_fmat perspective)
 {
 	whitgl_sys_enable_depth(true);
-	whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup_size.x/(float)setup_size.y, 0.1f, 1024.0f);
 
 	whitgl_int i;
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)

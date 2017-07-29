@@ -14,6 +14,8 @@
 
 #include <heightmap.h>
 #include <glider.h>
+#include <thermal.h>
+
 
 
 char _piece_shader[16384];
@@ -94,6 +96,7 @@ int main()
 	ld39_glider glider = ld39_glider_zero;
 	glider.shake_seed = whitgl_random_seed_init(0);
 	ld39_world_generate(world, glider.pos);
+	whitgl_float time = 0;
 
 	bool running = true;
 	whitgl_int frame = 0;
@@ -114,12 +117,16 @@ int main()
 				break;
 			glider = ld39_glider_update(glider);
 			ld39_world_update(world, glider.pos);
+			time += 1.0/60;
 		}
 		if(running == false)
 			break;
 		whitgl_sys_draw_init(0);
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
-		ld39_world_draw(view, setup.size);
+		whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup.size.x/(float)setup.size.y, 0.1f, 1024.0f);
+
+		ld39_world_draw(view, perspective);
+		ld39_thermal_draw(ld39_thermal_zero, time, view, perspective);
 		ld39_glider_draw_meters(glider, setup.size);
 		whitgl_sys_draw_finish();
 
