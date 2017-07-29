@@ -8,14 +8,16 @@
 #include <whitgl/sys.h>
 #include <whitgl/timer.h>
 
+#include <heightmap.h>
+
 int main()
 {
 	WHITGL_LOG("Starting main.");
 
 	whitgl_sys_setup setup = whitgl_sys_setup_zero;
-	setup.size.x = 320;
-	setup.size.y = 180;
-	setup.pixel_size = 2;
+	setup.size.x = 512;
+	setup.size.y = 512;
+	setup.pixel_size = 1;
 	setup.name = "game";
 
 	WHITGL_LOG("Initiating sys");
@@ -46,6 +48,7 @@ int main()
 				running = false;
 		}
 		whitgl_sys_draw_init(0);
+		ld39_heightmap_draw();
 		whitgl_sys_draw_finish();
 	}
 
