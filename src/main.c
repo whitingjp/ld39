@@ -91,9 +91,8 @@ int main()
 	whitgl_timer_init();
 
 	ld39_world *world = malloc(sizeof(ld39_world));
-	whitgl_fvec start = {1024,1024};
-	ld39_world_generate(world, start);
 	ld39_glider glider = ld39_glider_zero;
+	ld39_world_generate(world, glider.pos);
 
 	bool running = true;
 	whitgl_int frame = 0;

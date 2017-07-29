@@ -109,22 +109,18 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 }
 
 
-void ld39_world_generate(ld39_world* world, whitgl_fvec center)
+void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos)
 {
-	(void)center;
 	whitgl_int i;
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
 		world->maps[i] = ld39_heightmap_zero;
 		whitgl_sys_update_model_from_data(i, 0, NULL);
-		// whitgl_ivec p = {i%4, i/4};
-		// whitgl_fvec offset = {(p.x-2)*(heightmap_size.x), (p.y-2)*(heightmap_size.y)};
-		// whitgl_int j;
-		// ld39_heightmap_new(&world->maps[i], whitgl_fvec_add(center, offset), i);
-		// for(j=0; j<NUMBER_OF_FRAMES_PER_GEN+1; j++)
-		// 	ld39_heightmap_do_some_generating(&world->maps[i]);
 	}
 	world->current_gen = -1;
+
+	while(!world->maps[8].active)
+		ld39_world_update(world, glider_pos);
 }
 void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 {
