@@ -10,7 +10,7 @@ typedef struct
 	whitgl_float radius;
 } ld39_thermal;
 
-static const ld39_thermal ld39_thermal_zero = {{1024*6,1024*6-32,24},32,12};
+static const ld39_thermal ld39_thermal_zero = {{1024*6,1024*6-16,24},16,4};
 
 void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view, whitgl_fmat perspective);
 

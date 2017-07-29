@@ -30,6 +30,8 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 {
 	glider.camera_shake = 0;
 	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
+	glider.pos.z += glider.thermal_lift/120;
+	glider.thermal_lift = glider.thermal_lift*0.99;
 
 	whitgl_fvec joystick = whitgl_fvec_scale_val(whitgl_input_joystick(), glider.forward_speed/5);
 	glider.joystick = whitgl_fvec_interpolate(joystick, glider.joystick, 0.95);
@@ -137,7 +139,7 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_sys_color altimeter_player_col = {0xff,0xff,0xff,0xcc};
 	whitgl_sys_draw_iaabb(altimeter_player, altimeter_player_col);
 
-	whitgl_float altitude_speed = glider.speed.z*10;
+	whitgl_float altitude_speed = (glider.speed.z+glider.thermal_lift)*10;
 	whitgl_int center_altimer_box_x = (altimeter_box.a.x+altimeter_box.b.x)/2;
 	whitgl_iaabb altimeter_player_speed = {{center_altimer_box_x-border/16, altimeter_pos-border/16}, {center_altimer_box_x+border/16, altimeter_pos+border/16}};
 	if(altitude_speed > 0)

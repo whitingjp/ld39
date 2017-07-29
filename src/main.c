@@ -118,6 +118,14 @@ int main()
 			glider = ld39_glider_update(glider);
 			ld39_world_update(world, glider.pos);
 			time += 1.0/60;
+
+			whitgl_fvec glider2d = {glider.pos.x, glider.pos.y};
+			whitgl_fvec base2d = {ld39_thermal_zero.base.x, ld39_thermal_zero.base.y};
+			whitgl_fvec diff = whitgl_fvec_sub(glider2d, base2d);
+			if(whitgl_fvec_magnitude(diff) < ld39_thermal_zero.radius && glider.pos.z > ld39_thermal_zero.base.z && glider.pos.z < ld39_thermal_zero.base.z+ld39_thermal_zero.height)
+			{
+				glider.thermal_lift += 0.02;
+			}
 		}
 		if(running == false)
 			break;
