@@ -14,6 +14,7 @@ typedef struct
 typedef struct
 {
 	whitgl_fvec center;
+	whitgl_int model_id;
 	ld39_triangle tris[heightmap_num_tris];
 	whitgl_int tri;
 	whitgl_bool active;
@@ -24,9 +25,6 @@ typedef struct
 {
 	ld39_heightmap maps[MAX_ACTIVE_MAPS];
 } ld39_world;
-
-void ld39_heightmap_generate(ld39_heightmap* heightmap, whitgl_fvec center);
-void ld39_heightmap_draw(whitgl_int id, whitgl_fmat view, whitgl_ivec setup_size);
 
 void ld39_world_generate(ld39_world* heightmap, whitgl_fvec center);
 void ld39_world_update(ld39_world* world);

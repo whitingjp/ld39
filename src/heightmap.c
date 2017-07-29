@@ -49,44 +49,37 @@ whitgl_float stacked_perlin2d(whitgl_float x, whitgl_float y, whitgl_int seed)
 	return height;
 }
 
-// void ld39_heightmap_generate(ld39_heightmap* heightmap, whitgl_fvec center)
-// {
-// 	whitgl_int i;
-// 	whitgl_int tri = 0;
-// 	for(i=0; i<heightmap_size.x*heightmap_size.y; i++)
-// 	{
-// 		whitgl_int index = tri/4;
-// 		whitgl_float x = index%heightmap_size.x-heightmap_size.x/2+center.x;
-// 		whitgl_float y = index/heightmap_size.y-heightmap_size.y/2+center.y;
-// 		whitgl_fvec3 corners[4];
-// 		whitgl_fvec3 tl = {x, y, stacked_perlin2d(x,y,0)};
-// 		corners[0] = tl;
-// 		whitgl_fvec3 tr = {x+1, y, stacked_perlin2d(x+1,y,0)};
-// 		corners[1] = tr;
-// 		whitgl_fvec3 br = {x+1, y+1, stacked_perlin2d(x+1,y+1,0)};
-// 		corners[2] = br;
-// 		whitgl_fvec3 bl = {x, y+1, stacked_perlin2d(x,y+1,0)};
-// 		corners[3] = bl;
-// 		whitgl_fvec3 mid = {x+0.5, y+0.5, stacked_perlin2d(x+0.5,y+0.5,0)};
-
-// 		whitgl_int j;
-// 		for(j=0; j<4; j++)
-// 		{
-// 			whitgl_int next = (j+1)%4;
-// 			ld39_triangle triangle = {{mid, corners[j], corners[next]}};
-// 			heightmap->tris[tri++] = triangle;
-// 		}
-// 	}
-// 	heightmap->center = center;
-// }
-void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center)
+void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center, whitgl_int model_id)
 {
 	heightmap->tri = 0;
 	heightmap->center = center;
+	heightmap->active = false;
+	heightmap->model_id = model_id;
 }
+
 #define NUMBER_OF_FRAMES_PER_GEN (16)
 void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 {
+	if(heightmap->tri == heightmap_num_tris)
+	{
+		heightmap->active = true;
+		float *data = malloc(sizeof(float)*heightmap->tri*3*9);
+		whitgl_int off = 0;
+		whitgl_int i;
+		for(i=0; i<heightmap->tri; i++)
+		{
+			ld39_triangle t = heightmap->tris[i];
+			whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(t.p[1],t.p[0]), whitgl_fvec3_sub(t.p[2],t.p[0]));
+			normal = whitgl_fvec3_normalize(normal);
+			data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+			data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+			data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		}
+		whitgl_sys_update_model_from_data(heightmap->model_id, off/9, (char*)data);
+		free(data);
+		return;
+	}
+
 	whitgl_int i;
 	for(i=0; i<(heightmap_size.x*heightmap_size.y)/NUMBER_OF_FRAMES_PER_GEN; i++)
 	{
@@ -113,23 +106,6 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 		}
 	}
 }
-void ld39_heightmap_update_model(ld39_heightmap* heightmap, whitgl_int id)
-{
-	float *data = malloc(sizeof(float)*heightmap_num_tris*3*9);
-	whitgl_int off = 0;
-	whitgl_int i;
-	for(i=0; i<heightmap_num_tris; i++)
-	{
-		ld39_triangle t = heightmap->tris[i];
-		whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(t.p[1],t.p[0]), whitgl_fvec3_sub(t.p[2],t.p[0]));
-		normal = whitgl_fvec3_normalize(normal);
-		data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-	}
-	whitgl_sys_update_model_from_data(id, off/9, (char*)data);
-	free(data);
-}
 
 
 
@@ -150,18 +126,16 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec center)
 		whitgl_ivec p = {i%4, i/4};
 		whitgl_fvec offset = {(p.x-2)*(heightmap_size.x), (p.y-2)*(heightmap_size.y)};
 		whitgl_int j;
-		ld39_heightmap_new(&world->maps[i], whitgl_fvec_add(center, offset));
-		for(j=0; j<NUMBER_OF_FRAMES_PER_GEN; j++)
+		ld39_heightmap_new(&world->maps[i], whitgl_fvec_add(center, offset), i);
+		for(j=0; j<NUMBER_OF_FRAMES_PER_GEN+1; j++)
 			ld39_heightmap_do_some_generating(&world->maps[i]);
-		ld39_heightmap_update_model(&world->maps[i], i);
 	}
 }
 void ld39_world_update(ld39_world* world)
 {
-	if(world->maps[0].tri == heightmap_num_tris)
+	if(world->maps[0].active)
 	{
-		ld39_heightmap_update_model(&world->maps[0], 0);
-		ld39_heightmap_new(&world->maps[0], world->maps[0].center);
+		ld39_heightmap_new(&world->maps[0], world->maps[0].center, 0);
 	}
 	else
 	{
