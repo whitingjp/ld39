@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <whitgl/input.h>
 #include <whitgl/logging.h>
@@ -9,6 +10,8 @@
 #include <whitgl/timer.h>
 
 #include <heightmap.h>
+
+
 
 int main()
 {
@@ -34,6 +37,9 @@ int main()
 	WHITGL_LOG("Initiating timer");
 	whitgl_timer_init();
 
+	ld39_heightmap *heightmap = malloc(sizeof(ld39_heightmap));
+	ld39_heightmap_generate(heightmap);
+
 	bool running = true;
 	while(running)
 	{
@@ -51,6 +57,8 @@ int main()
 		ld39_heightmap_draw();
 		whitgl_sys_draw_finish();
 	}
+
+	free(heightmap);
 
 	WHITGL_LOG("Shutting down input");
 	whitgl_input_shutdown();
