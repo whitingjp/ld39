@@ -89,8 +89,9 @@ int main()
 	WHITGL_LOG("Initiating timer");
 	whitgl_timer_init();
 
-	ld39_heightmap *heightmap = malloc(sizeof(ld39_heightmap));
-	ld39_heightmap_generate(heightmap);
+	ld39_world *world = malloc(sizeof(ld39_world));
+	whitgl_fvec start = {1024,1024};
+	ld39_world_generate(world, start);
 	ld39_glider glider = ld39_glider_zero;
 
 	bool running = true;
@@ -108,16 +109,17 @@ int main()
 			if(running == false)
 				break;
 			glider = ld39_glider_update(glider);
+			ld39_world_update(world);
 		}
 		if(running == false)
 			break;
 		whitgl_sys_draw_init(0);
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
-		ld39_heightmap_draw(view, setup.size);
+		ld39_world_draw(view, setup.size);
 		whitgl_sys_draw_finish();
 	}
 
-	free(heightmap);
+	free(world);
 
 	WHITGL_LOG("Shutting down input");
 	whitgl_input_shutdown();
