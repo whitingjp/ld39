@@ -28,6 +28,7 @@
 
 ld39_glider ld39_glider_update(ld39_glider glider)
 {
+	glider.camera_shake = 0;
 	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
 
 	whitgl_fvec joystick = whitgl_input_joystick();
@@ -54,6 +55,15 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
 	glider.forward_speed = glider.forward_speed*0.9999;
+
+	if(glider.forward_speed > 7)
+	{
+		whitgl_float extra_deccel_factor = (glider.forward_speed-7);
+		extra_deccel_factor = whitgl_fpow(extra_deccel_factor, 2);
+		glider.camera_shake += extra_deccel_factor*4;
+		glider.forward_speed -= extra_deccel_factor*0.1;
+	}
+
 	glider.forward_speed_change = glider.forward_speed - old_forward_speed;
 
 	// WHITGL_LOG("glider.forward_speed %.2f", glider.forward_speed);
@@ -63,6 +73,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		whitgl_quat stall_down = whitgl_quat_rotate(-whitgl_tau/4, pitch_axis);
 		// WHITGL_LOG("stall_factor %.2f", stall_factor);
 		glider.facing = whitgl_quat_slerp(glider.facing, stall_down, stall_factor/20);
+		glider.camera_shake += stall_factor*2;
 	}
 
 	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0)
@@ -70,11 +81,19 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	if(glider.boost > 0)
 	{
-		glider.boost -= 1.0/30;
+		glider.boost -= 1.0/120;
 		whitgl_float boost_factor = 1-whitgl_fpow(glider.boost*2-1,2);
-		glider.forward_speed += 0.1*boost_factor;
+		glider.forward_speed += 0.02*boost_factor;
+		glider.camera_shake += boost_factor*2;
 	}
 
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.x = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.y = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.z = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	glider.shake_offset = whitgl_fvec3_interpolate(glider.shake_offset, glider.target_shake_offset, 0.1);
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
 
@@ -83,10 +102,19 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider)
 {
 	whitgl_fvec3 eye = glider.pos;
+
 	whitgl_fvec3 forward = {0,1,0};
 	whitgl_fvec3 up = {0,0,1};
 
-	whitgl_fmat rot = whitgl_quat_to_fmat(glider.facing);
+	whitgl_fvec3 actual_shake = whitgl_fvec3_scale_val(glider.shake_offset, glider.camera_shake);
+
+	whitgl_quat shake1 = whitgl_quat_rotate(actual_shake.x, up);
+	whitgl_quat shake2 = whitgl_quat_rotate(actual_shake.y, forward);
+	whitgl_quat view_facing = glider.facing;
+	view_facing = whitgl_quat_multiply(shake1, view_facing);
+	view_facing = whitgl_quat_multiply(shake2, view_facing);
+
+	whitgl_fmat rot = whitgl_quat_to_fmat(view_facing);
 	forward = whitgl_fvec3_apply_fmat(forward, rot);
 	up = whitgl_fvec3_apply_fmat(up, rot);
 
@@ -126,7 +154,7 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 
 	whitgl_iaabb velocity_box = {{setup_size.x-border-setup_size.x/16, border}, {setup_size.x-border,setup_size.y-border}};
 	whitgl_sys_draw_iaabb(velocity_box, altimeter_bg);
-	whitgl_float max_velocity = 10;
+	whitgl_float max_velocity = 8;
 	whitgl_float velocity_pos = whitgl_finterpolate(velocity_box.b.y, velocity_box.a.y, glider.forward_speed/max_velocity);
 	whitgl_iaabb velocity_player = {{velocity_box.a.x, velocity_pos-border/16}, {velocity_box.b.x, velocity_pos+border/16}};
 	whitgl_sys_color velocity_player_col = {0xff,0xff,0xff,0xcc};
@@ -146,5 +174,11 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_iaabb velocity_stall = {{velocity_box.a.x, stall_pos}, {velocity_box.b.x, velocity_box.b.y}};
 	whitgl_sys_color velocity_stall_col = {0xff,0x00,0x00,0x40};
 	whitgl_sys_draw_iaabb(velocity_stall, velocity_stall_col);
+
+	whitgl_float too_fast = 7;
+	whitgl_float too_fast_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, too_fast/max_velocity);
+	whitgl_iaabb too_fast_box = {{velocity_box.a.x, velocity_box.a.y}, {velocity_box.b.x, too_fast_pos}};
+	whitgl_sys_color too_fast_col = {0xff,0xff,0x00,0x40};
+	whitgl_sys_draw_iaabb(too_fast_box, too_fast_col);
 
 }

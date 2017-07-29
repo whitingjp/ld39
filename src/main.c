@@ -92,6 +92,7 @@ int main()
 
 	ld39_world *world = malloc(sizeof(ld39_world));
 	ld39_glider glider = ld39_glider_zero;
+	glider.shake_seed = whitgl_random_seed_init(0);
 	ld39_world_generate(world, glider.pos);
 
 	bool running = true;
