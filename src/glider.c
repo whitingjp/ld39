@@ -51,8 +51,11 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	whitgl_fvec3 gravity = {0,0,-1};
 	whitgl_float gravity_dot = whitgl_fvec3_dot(glider.speed, gravity);
+
+	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
 	glider.forward_speed = glider.forward_speed*0.9999;
+	glider.forward_speed_change = glider.forward_speed - old_forward_speed;
 
 	// WHITGL_LOG("glider.forward_speed %.2f", glider.forward_speed);
 	if(glider.forward_speed < 2)
@@ -100,6 +103,15 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_sys_color altimeter_player_col = {0xff,0xff,0xff,0xcc};
 	whitgl_sys_draw_iaabb(altimeter_player, altimeter_player_col);
 
+	whitgl_float altitude_speed = glider.speed.z*10;
+	whitgl_int center_altimer_box_x = (altimeter_box.a.x+altimeter_box.b.x)/2;
+	whitgl_iaabb altimeter_player_speed = {{center_altimer_box_x-border/16, altimeter_pos-border/16}, {center_altimer_box_x+border/16, altimeter_pos+border/16}};
+	if(altitude_speed > 0)
+		altimeter_player_speed.a.y -= altitude_speed;
+	else
+		altimeter_player_speed.b.y -= altitude_speed;
+	whitgl_sys_draw_iaabb(altimeter_player_speed, altimeter_player_col);
+
 	whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
 	whitgl_float altimeter_ground_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, ground_height/max_altitude);
 	whitgl_iaabb altimeter_ground = {{altimeter_box.a.x, altimeter_ground_pos}, {altimeter_box.b.x, altimeter_box.b.y}};
@@ -113,6 +125,15 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_iaabb velocity_player = {{velocity_box.a.x, velocity_pos-border/16}, {velocity_box.b.x, velocity_pos+border/16}};
 	whitgl_sys_color velocity_player_col = {0xff,0xff,0xff,0xcc};
 	whitgl_sys_draw_iaabb(velocity_player, velocity_player_col);
+
+	whitgl_float forward_speed_change = glider.forward_speed_change*5000;
+	whitgl_int center_velocity_box_x = (velocity_box.a.x+velocity_box.b.x)/2;
+	whitgl_iaabb velocity_speed_change = {{center_velocity_box_x-border/16, velocity_pos-border/16}, {center_velocity_box_x+border/16, velocity_pos+border/16}};
+	if(forward_speed_change > 0)
+		velocity_speed_change.a.y -= forward_speed_change;
+	else
+		velocity_speed_change.b.y -= forward_speed_change;
+	whitgl_sys_draw_iaabb(velocity_speed_change, altimeter_player_col);
 
 	whitgl_float stall_speed = 2;
 	whitgl_float stall_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, stall_speed/max_velocity);
