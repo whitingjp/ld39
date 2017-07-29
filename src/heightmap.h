@@ -17,6 +17,6 @@ typedef struct
 } ld39_heightmap;
 
 void ld39_heightmap_generate(ld39_heightmap* heightmap);
-void ld39_heightmap_draw();
+void ld39_heightmap_draw(whitgl_ivec setup_size);
 
 #endif // WHITGL_HEIGHTMAP_H_

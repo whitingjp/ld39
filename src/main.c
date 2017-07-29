@@ -18,10 +18,12 @@ int main()
 	WHITGL_LOG("Starting main.");
 
 	whitgl_sys_setup setup = whitgl_sys_setup_zero;
-	setup.size.x = 512;
-	setup.size.y = 512;
+	setup.size.x = 1920/2;
+	setup.size.y = 1080/2;
 	setup.pixel_size = 1;
 	setup.name = "game";
+	setup.fullscreen = false;
+	setup.resolution_mode = RESOLUTION_USE_WINDOW;
 
 	WHITGL_LOG("Initiating sys");
 	if(!whitgl_sys_init(&setup))
@@ -54,7 +56,7 @@ int main()
 				running = false;
 		}
 		whitgl_sys_draw_init(0);
-		ld39_heightmap_draw();
+		ld39_heightmap_draw(setup.size);
 		whitgl_sys_draw_finish();
 	}
 
