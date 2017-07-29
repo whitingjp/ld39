@@ -19,11 +19,13 @@ typedef struct
 	whitgl_int tri;
 	whitgl_bool active;
 } ld39_heightmap;
+static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false};
 
 #define MAX_ACTIVE_MAPS (16)
 typedef struct
 {
 	ld39_heightmap maps[MAX_ACTIVE_MAPS];
+	whitgl_int current_gen;
 } ld39_world;
 
 void ld39_world_generate(ld39_world* heightmap, whitgl_fvec center);

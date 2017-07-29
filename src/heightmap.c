@@ -108,21 +108,12 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 }
 
 
-
-void ld39_heightmap_draw(whitgl_int id, whitgl_fmat view, whitgl_ivec setup_size)
-{
-	whitgl_sys_enable_depth(true);
-	whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup_size.x/(float)setup_size.y, 0.1f, 1024.0f);
-
-	whitgl_set_shader_color(WHITGL_SHADER_FLAT, 0, whitgl_sys_color_white);
-	whitgl_sys_draw_model(id, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
-}
-
 void ld39_world_generate(ld39_world* world, whitgl_fvec center)
 {
 	whitgl_int i;
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
+		whitgl_sys_update_model_from_data(i, 0, NULL);
 		whitgl_ivec p = {i%4, i/4};
 		whitgl_fvec offset = {(p.x-2)*(heightmap_size.x), (p.y-2)*(heightmap_size.y)};
 		whitgl_int j;
@@ -130,24 +121,33 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec center)
 		for(j=0; j<NUMBER_OF_FRAMES_PER_GEN+1; j++)
 			ld39_heightmap_do_some_generating(&world->maps[i]);
 	}
+	world->current_gen = 0;
 }
 void ld39_world_update(ld39_world* world)
 {
-	if(world->maps[0].active)
+	if(world->maps[world->current_gen].active)
 	{
+		// find the furthest existing
+
+		// find the nearest unnoccupied potential
+
 		ld39_heightmap_new(&world->maps[0], world->maps[0].center, 0);
 	}
 	else
 	{
-		ld39_heightmap_do_some_generating(&world->maps[0]);
+		ld39_heightmap_do_some_generating(&world->maps[world->current_gen]);
 	}
 }
 
 void ld39_world_draw(whitgl_fmat view, whitgl_ivec setup_size)
 {
+	whitgl_sys_enable_depth(true);
+	whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup_size.x/(float)setup_size.y, 0.1f, 1024.0f);
+
 	whitgl_int i;
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
-		ld39_heightmap_draw(i, view, setup_size);
+		whitgl_sys_draw_model(i, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
 	}
+
 }
