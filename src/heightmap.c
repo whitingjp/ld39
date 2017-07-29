@@ -75,14 +75,23 @@ void ld39_heightmap_generate(ld39_heightmap* heightmap)
 			heightmap->tris[tri++] = triangle;
 		}
 	}
-	float *data = malloc(sizeof(float)*heightmap_num_tris*3*9);
+	float *data = malloc(sizeof(float)*tri*3*9);
 	whitgl_int off = 0;
-	for(i=0; i<heightmap_num_tris; i++)
+	for(i=0; i<tri; i++)
 	{
 		ld39_triangle t = heightmap->tris[i];
-		data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = t.p[0].z/8; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = t.p[1].z/8; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = t.p[2].z/8; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(t.p[1],t.p[0]), whitgl_fvec3_sub(t.p[2],t.p[0]));
+		normal = whitgl_fvec3_normalize(normal);
+		normal.x = (normal.x + 1)/2;
+		normal.y = (normal.y + 1)/2;
+		normal.z = (normal.z + 1)/2;
+		whitgl_fvec3 sun_dir = {0.1,-0.2,0.5};
+		whitgl_fvec3_normalize(sun_dir);
+		whitgl_float light = whitgl_fmax(0,whitgl_fvec3_dot(normal, sun_dir));
+
+		data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
 	}
 	whitgl_sys_update_model_from_data(0, off/9, (char*)data);
 	free(data);
@@ -90,24 +99,8 @@ void ld39_heightmap_generate(ld39_heightmap* heightmap)
 
 void ld39_heightmap_draw(whitgl_ivec setup_size)
 {
-	// whitgl_ivec size = heightmap_size;
-	// unsigned char data[4*heightmap_size.x*heightmap_size.y];
-	// whitgl_int i;
-	// for(i=0; i<size.x*size.y; i++)
-	// {
-	// 	whitgl_float height = stacked_perlin2d(i%size.x, i/size.x, 0)*255;
-	// 	data[i*4+0] = height;
-	// 	data[i*4+1] = height;
-	// 	data[i*4+2] = height;
-	// 	data[i*4+3] = 255;
-	// }
-	// whitgl_sys_update_image_from_data(0, size, data);
-	// whitgl_sprite sprite = {0, whitgl_ivec_zero, size};
-	// whitgl_sys_draw_sprite(sprite, whitgl_ivec_zero, whitgl_ivec_zero);
-
-	// whitgl_fmat projection = whitgl_fmat_orthographic(0, heightmap_size.x, 0, heightmap_size.y, 0, 1);
 	whitgl_sys_enable_depth(true);
-	whitgl_fvec3 eye = {heightmap_size.x-32,heightmap_size.y-32,12};
+	whitgl_fvec3 eye = {heightmap_size.x-32,heightmap_size.y-32,8};
 	whitgl_fvec3 center = {0,0,0};
 	whitgl_fvec3 up = {0,0,1};
 
