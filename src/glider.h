@@ -19,9 +19,10 @@ typedef struct
 	whitgl_random_seed shake_seed;
 	whitgl_fvec3 shake_offset;
 	whitgl_fvec3 target_shake_offset;
+	whitgl_float stall_factor;
 } ld39_glider;
 
-static const ld39_glider ld39_glider_zero = {{1024*6,1024*6,32},{0,0,0,1},{0,-1,0},3,0,{0,0}, 0, 0, whitgl_random_seed_zero, {0,0,0}, {0,0,0}};
+static const ld39_glider ld39_glider_zero = {{1024*6,1024*6,32},{0,0,0,1},{0,-1,0},3,0,{0,0}, 0, 0, whitgl_random_seed_zero, {0,0,0}, {0,0,0}, 0};
 ld39_glider ld39_glider_update(ld39_glider glider);
 whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider);
 void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size);

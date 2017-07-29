@@ -31,7 +31,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	glider.camera_shake = 0;
 	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
 
-	whitgl_fvec joystick = whitgl_input_joystick();
+	whitgl_fvec joystick = whitgl_fvec_scale_val(whitgl_input_joystick(), glider.forward_speed/5);
 	glider.joystick = whitgl_fvec_interpolate(joystick, glider.joystick, 0.95);
 
 	whitgl_fvec3 roll_axis = {0,1,0};
@@ -55,6 +55,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
 	glider.forward_speed = glider.forward_speed*0.9999;
+	glider.forward_speed -= whitgl_fvec_magnitude(glider.joystick)/5000;
 
 	if(glider.forward_speed > 7)
 	{
@@ -66,14 +67,13 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	glider.forward_speed_change = glider.forward_speed - old_forward_speed;
 
-	// WHITGL_LOG("glider.forward_speed %.2f", glider.forward_speed);
+	glider.stall_factor = 0;
 	if(glider.forward_speed < 2)
 	{
-		whitgl_float stall_factor = whitgl_fpow(1-glider.forward_speed/2, 2);
+		glider.stall_factor = whitgl_fpow(1-glider.forward_speed/2, 2);
 		whitgl_quat stall_down = whitgl_quat_rotate(-whitgl_tau/4, pitch_axis);
-		// WHITGL_LOG("stall_factor %.2f", stall_factor);
-		glider.facing = whitgl_quat_slerp(glider.facing, stall_down, stall_factor/20);
-		glider.camera_shake += stall_factor*2;
+		glider.facing = whitgl_quat_slerp(glider.facing, stall_down, glider.stall_factor/20);
+		glider.camera_shake += glider.stall_factor*2;
 	}
 
 	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0)
