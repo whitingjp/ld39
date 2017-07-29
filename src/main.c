@@ -60,16 +60,16 @@ int main()
 	// whitgl_ivec buffer_size = {setup.size.x*2, setup.size.y*2};
 	// whitgl_resize_framebuffer(0, buffer_size, false);
 
-	_load_shader_piece("data/shader/super_sample.gl", _piece_shader, 16384);
-	whitgl_shader post_shader = whitgl_shader_zero;
-	post_shader.fragment_src = _piece_shader;
-	post_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC;
-	post_shader.uniforms[0].name = "resolution";
-	post_shader.num_uniforms = 1;
-	if(!whitgl_change_shader( WHITGL_SHADER_POST, post_shader))
-		WHITGL_PANIC("failed to change shader");
-	whitgl_fvec resolution = {setup.size.x, setup.size.y};
-	whitgl_set_shader_fvec(WHITGL_SHADER_POST, 0, resolution);
+	// _load_shader_piece("data/shader/super_sample.gl", _piece_shader, 16384);
+	// whitgl_shader post_shader = whitgl_shader_zero;
+	// post_shader.fragment_src = _piece_shader;
+	// post_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC;
+	// post_shader.uniforms[0].name = "resolution";
+	// post_shader.num_uniforms = 1;
+	// if(!whitgl_change_shader( WHITGL_SHADER_POST, post_shader))
+	// 	WHITGL_PANIC("failed to change shader");
+	// whitgl_fvec resolution = {setup.size.x, setup.size.y};
+	// whitgl_set_shader_fvec(WHITGL_SHADER_POST, 0, resolution);
 
 	_load_shader_piece("data/shader/heightmap.gl", _piece_shader, 16384);
 	whitgl_shader heightmap_shader = whitgl_shader_zero;
@@ -97,7 +97,7 @@ int main()
 
 	bool running = true;
 	whitgl_int frame = 0;
-	whitgl_profile_should_report(true);
+	// whitgl_profile_should_report(true);
 
 	while(running)
 	{
