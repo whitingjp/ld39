@@ -10,7 +10,7 @@
 #include <whitgl/timer.h>
 
 #include <heightmap.h>
-
+#include <glider.h>
 
 
 int main()
@@ -41,6 +41,7 @@ int main()
 
 	ld39_heightmap *heightmap = malloc(sizeof(ld39_heightmap));
 	ld39_heightmap_generate(heightmap);
+	ld39_glider glider = ld39_glider_zero;
 
 	bool running = true;
 	while(running)
@@ -54,9 +55,15 @@ int main()
 				running = false;
 			if(whitgl_sys_should_close())
 				running = false;
+			if(running == false)
+				break;
+			glider = ld39_glider_update(glider);
 		}
+		if(running == false)
+			break;
 		whitgl_sys_draw_init(0);
-		ld39_heightmap_draw(setup.size);
+		whitgl_fmat view = ld39_glider_onboard_camera(glider);
+		ld39_heightmap_draw(view, setup.size);
 		whitgl_sys_draw_finish();
 	}
 

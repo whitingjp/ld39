@@ -85,7 +85,7 @@ void ld39_heightmap_generate(ld39_heightmap* heightmap)
 		normal.x = (normal.x + 1)/2;
 		normal.y = (normal.y + 1)/2;
 		normal.z = (normal.z + 1)/2;
-		whitgl_fvec3 sun_dir = {0.1,-0.2,0.5};
+		whitgl_fvec3 sun_dir = {-0.1,0.2,0.5};
 		whitgl_fvec3_normalize(sun_dir);
 		whitgl_float light = whitgl_fmax(0,whitgl_fvec3_dot(normal, sun_dir));
 
@@ -97,15 +97,15 @@ void ld39_heightmap_generate(ld39_heightmap* heightmap)
 	free(data);
 }
 
-void ld39_heightmap_draw(whitgl_ivec setup_size)
+void ld39_heightmap_draw(whitgl_fmat view, whitgl_ivec setup_size)
 {
 	whitgl_sys_enable_depth(true);
-	whitgl_fvec3 eye = {heightmap_size.x-32,heightmap_size.y-32,8};
-	whitgl_fvec3 center = {0,0,0};
-	whitgl_fvec3 up = {0,0,1};
+	// whitgl_fvec3 eye = {32,32,6};
+	// whitgl_fvec3 center = {64,64,-12};
+	// whitgl_fvec3 up = {0,0,1};
 
 	whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup_size.x/(float)setup_size.y, 0.1f, 1024.0f);
-	whitgl_fmat view = whitgl_fmat_lookAt(eye, center, up);
+	// whitgl_fmat view = whitgl_fmat_lookAt(eye, center, up);
 
 	whitgl_set_shader_color(WHITGL_SHADER_FLAT, 0, whitgl_sys_color_white);
 	whitgl_sys_draw_model(0, WHITGL_SHADER_MODEL, whitgl_fmat_identity, view, perspective);
