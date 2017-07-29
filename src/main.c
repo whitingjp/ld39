@@ -10,6 +10,7 @@
 #include <whitgl/sound.h>
 #include <whitgl/sys.h>
 #include <whitgl/timer.h>
+#include <whitgl/profile.h>
 
 #include <heightmap.h>
 #include <glider.h>
@@ -56,8 +57,8 @@ int main()
 		return 1;
 	}
 
-	whitgl_ivec buffer_size = {setup.size.x*2, setup.size.y*2};
-	whitgl_resize_framebuffer(0, buffer_size, false);
+	// whitgl_ivec buffer_size = {setup.size.x*2, setup.size.y*2};
+	// whitgl_resize_framebuffer(0, buffer_size, false);
 
 	_load_shader_piece("data/shader/super_sample.gl", _piece_shader, 16384);
 	whitgl_shader post_shader = whitgl_shader_zero;
@@ -95,6 +96,9 @@ int main()
 	ld39_glider glider = ld39_glider_zero;
 
 	bool running = true;
+	whitgl_int frame = 0;
+	whitgl_profile_should_report(true);
+
 	while(running)
 	{
 		whitgl_sound_update();
@@ -117,6 +121,17 @@ int main()
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
 		ld39_world_draw(view, setup.size);
 		whitgl_sys_draw_finish();
+
+		frame++;
+		// if(time >= 2 && time < 12)
+		// {
+		// if(frame%2)
+		// {
+		// 	char buffer[1024];
+		// 	snprintf(buffer, 1024, "gif_%04d.png", (int)frame/2);
+		// 	WHITGL_LOG("buffer %s", buffer);
+		// 	whitgl_sys_capture_frame(buffer);
+		// }
 	}
 
 	free(world);

@@ -41,12 +41,11 @@ whitgl_float perlin2d(whitgl_float x, whitgl_float y, whitgl_float spacing, whit
 whitgl_float stacked_perlin2d(whitgl_float x, whitgl_float y, whitgl_int seed)
 {
 	whitgl_float height = 0;
-	height += perlin2d(x,y,1/127.0,seed)*64;
 	height += perlin2d(x,y,1/61.0,seed)*32;
 	height += perlin2d(x,y,1/29.0,seed)*16;
-	height += perlin2d(x,y,1/13.0,seed)*8;
-	height += perlin2d(x,y,1/7.0,seed)*4;
-	height += perlin2d(x,y,1/3.0,seed)*2;
+	height += perlin2d(x,y,1/13.0,seed)*4;
+	height += perlin2d(x,y,1/7.0,seed)*2;
+	height += perlin2d(x,y,1/3.0,seed);
 	height += perlin2d(x,y,1/1.0,seed)/2;
 	return height;
 }
@@ -59,7 +58,7 @@ void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center, whitgl_in
 	heightmap->model_id = model_id;
 }
 
-#define NUMBER_OF_FRAMES_PER_GEN (16)
+#define NUMBER_OF_FRAMES_PER_GEN (32)
 void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 {
 	if(heightmap->tri == heightmap_num_tris)
