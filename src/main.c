@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #include <whitgl/input.h>
 #include <whitgl/logging.h>
@@ -13,6 +15,27 @@
 #include <glider.h>
 
 
+char _piece_shader[16384];
+char _piece_shader2[16384];
+whitgl_int _load_shader_piece(const char* filename, char* buffer, whitgl_int buffer_size)
+{
+	memset(buffer, 0, buffer_size);
+	FILE *src;
+	src = fopen(filename, "rb");
+	if (src == NULL)
+	{
+		WHITGL_PANIC("Failed to open %s for load.", filename);
+	}
+	whitgl_int read = fread( buffer, 1, buffer_size, src );
+	if(read >= buffer_size)
+	{
+		WHITGL_PANIC("Not enough room in buffer for", filename);
+	}
+	WHITGL_LOG("Loaded data from %s", filename);
+	fclose(src);
+	return read;
+}
+
 int main()
 {
 	WHITGL_LOG("Starting main.");
@@ -24,6 +47,7 @@ int main()
 	setup.name = "game";
 	setup.fullscreen = false;
 	setup.resolution_mode = RESOLUTION_USE_WINDOW;
+	setup.start_focused = !setup.fullscreen;
 
 	WHITGL_LOG("Initiating sys");
 	if(!whitgl_sys_init(&setup))
@@ -31,6 +55,32 @@ int main()
 		WHITGL_LOG("Failed to initiate sys");
 		return 1;
 	}
+
+	whitgl_ivec buffer_size = {setup.size.x*2, setup.size.y*2};
+	whitgl_resize_framebuffer(0, buffer_size, false);
+
+	_load_shader_piece("data/shader/super_sample.gl", _piece_shader, 16384);
+	whitgl_shader post_shader = whitgl_shader_zero;
+	post_shader.fragment_src = _piece_shader;
+	post_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC;
+	post_shader.uniforms[0].name = "resolution";
+	post_shader.num_uniforms = 1;
+	if(!whitgl_change_shader( WHITGL_SHADER_POST, post_shader))
+		WHITGL_PANIC("failed to change shader");
+	whitgl_fvec resolution = {setup.size.x, setup.size.y};
+	whitgl_set_shader_fvec(WHITGL_SHADER_POST, 0, resolution);
+
+	_load_shader_piece("data/shader/heightmap.gl", _piece_shader, 16384);
+	whitgl_shader heightmap_shader = whitgl_shader_zero;
+	heightmap_shader.fragment_src = _piece_shader;
+	heightmap_shader.num_uniforms = 1;
+	heightmap_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC3;
+	heightmap_shader.uniforms[0].name = "eye";
+	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_0, heightmap_shader))
+		WHITGL_PANIC("failed to change shader");
+
+	whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
+	whitgl_sys_set_clear_color(sky);
 
 	WHITGL_LOG("Initiating sound");
 	whitgl_sound_init();

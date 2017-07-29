@@ -82,16 +82,13 @@ void ld39_heightmap_generate(ld39_heightmap* heightmap)
 		ld39_triangle t = heightmap->tris[i];
 		whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(t.p[1],t.p[0]), whitgl_fvec3_sub(t.p[2],t.p[0]));
 		normal = whitgl_fvec3_normalize(normal);
-		normal.x = (normal.x + 1)/2;
-		normal.y = (normal.y + 1)/2;
-		normal.z = (normal.z + 1)/2;
-		whitgl_fvec3 sun_dir = {-0.1,0.2,0.5};
-		whitgl_fvec3_normalize(sun_dir);
-		whitgl_float light = whitgl_fmax(0,whitgl_fvec3_dot(normal, sun_dir));
+		// whitgl_fvec3 sun_dir = {-0.1,0.2,0.5};
+		// whitgl_fvec3_normalize(sun_dir);
+		// whitgl_float light = whitgl_fmax(0,whitgl_fvec3_dot(normal, sun_dir));
 
-		data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = light; data[off++] = light; data[off++] = light; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
 	}
 	whitgl_sys_update_model_from_data(0, off/9, (char*)data);
 	free(data);
@@ -108,5 +105,5 @@ void ld39_heightmap_draw(whitgl_fmat view, whitgl_ivec setup_size)
 	// whitgl_fmat view = whitgl_fmat_lookAt(eye, center, up);
 
 	whitgl_set_shader_color(WHITGL_SHADER_FLAT, 0, whitgl_sys_color_white);
-	whitgl_sys_draw_model(0, WHITGL_SHADER_MODEL, whitgl_fmat_identity, view, perspective);
+	whitgl_sys_draw_model(0, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
 }

@@ -1,0 +1,17 @@
+#version 150
+
+in vec2 Texturepos;
+out vec4 outColor;
+uniform sampler2D tex;
+uniform vec2 resolution;
+void main()
+{
+	float dx = 1.0/(resolution.x);
+	float dy = 1.0/(resolution.y);
+	vec4 accu = vec4(0);
+	accu += texture( tex, Texturepos+vec2(-dx/4,-dy/4));
+	accu += texture( tex, Texturepos+vec2( dx/4,-dy/4));
+	accu += texture( tex, Texturepos+vec2(-dx/4, dy/4));
+	accu += texture( tex, Texturepos+vec2( dx/4, dy/4));
+	outColor = accu/4;
+}

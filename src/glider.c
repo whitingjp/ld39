@@ -2,6 +2,7 @@
 
 #include <whitgl/input.h>
 #include <whitgl/logging.h>
+#include <whitgl/sys.h>
 
 
 	// more realistic maths that I couldn't get feeling right
@@ -29,11 +30,12 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/60));
 
 	whitgl_fvec joystick = whitgl_input_joystick();
+	glider.joystick = whitgl_fvec_interpolate(joystick, glider.joystick, 0.9);
 
 	whitgl_fvec3 roll_axis = {0,1,0};
 	whitgl_fvec3 pitch_axis = {0,0,1};
-	whitgl_quat roll = whitgl_quat_rotate(-joystick.x/64, roll_axis);
-	whitgl_quat pitch = whitgl_quat_rotate(joystick.y/64, pitch_axis);
+	whitgl_quat roll = whitgl_quat_rotate(-glider.joystick.x/64, roll_axis);
+	whitgl_quat pitch = whitgl_quat_rotate(glider.joystick.y/64, pitch_axis);
 	glider.facing = whitgl_quat_multiply(pitch, glider.facing);
 	glider.facing = whitgl_quat_multiply(roll, glider.facing);
 
@@ -55,7 +57,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.forward_speed += 0.1;
 
 
-
+	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
 
 	return glider;
 }
