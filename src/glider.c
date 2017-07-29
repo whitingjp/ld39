@@ -40,7 +40,6 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	glider.facing = whitgl_quat_multiply(pitch, glider.facing);
 	glider.facing = whitgl_quat_multiply(roll, glider.facing);
 
-
 	whitgl_fmat rot = whitgl_quat_to_fmat(glider.facing);
 	whitgl_fvec3 forward = {0,1,0};
 	whitgl_fvec3 up = {0,0,1};
@@ -66,8 +65,15 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.facing = whitgl_quat_slerp(glider.facing, stall_down, stall_factor/20);
 	}
 
-	if(whitgl_input_held(WHITGL_INPUT_A))
-		glider.forward_speed += 0.1;
+	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0)
+		glider.boost = 1.0;
+
+	if(glider.boost > 0)
+	{
+		glider.boost -= 1.0/30;
+		whitgl_float boost_factor = 1-whitgl_fpow(glider.boost*2-1,2);
+		glider.forward_speed += 0.1*boost_factor;
+	}
 
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
