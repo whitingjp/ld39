@@ -29,7 +29,6 @@ whitgl_float perlin2d(whitgl_float x, whitgl_float y, whitgl_float spacing, whit
 	whitgl_int iy = y > 0 ? y : y-1;
 	whitgl_float x_part = whitgl_fwrap(x, 0, 1);
 	whitgl_float y_part = whitgl_fwrap(y, 0, 1);
-	if(x < 0) WHITGL_LOG("x %.2f ix %d x_part %.2f", x, ix, x_part);
 	whitgl_float tl = noise2d(ix,iy,seed);
 	whitgl_float tr = noise2d(ix+1,iy,seed);
 	whitgl_float bl = noise2d(ix,iy+1,seed);
@@ -42,10 +41,13 @@ whitgl_float perlin2d(whitgl_float x, whitgl_float y, whitgl_float spacing, whit
 whitgl_float stacked_perlin2d(whitgl_float x, whitgl_float y, whitgl_int seed)
 {
 	whitgl_float height = 0;
+	height += perlin2d(x,y,1/127.0,seed)*64;
+	height += perlin2d(x,y,1/61.0,seed)*32;
+	height += perlin2d(x,y,1/29.0,seed)*16;
 	height += perlin2d(x,y,1/13.0,seed)*8;
 	height += perlin2d(x,y,1/7.0,seed)*4;
 	height += perlin2d(x,y,1/3.0,seed)*2;
-	height += perlin2d(x,y,1/1.0,seed);
+	height += perlin2d(x,y,1/1.0,seed)/2;
 	return height;
 }
 
@@ -110,28 +112,79 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 
 void ld39_world_generate(ld39_world* world, whitgl_fvec center)
 {
+	(void)center;
 	whitgl_int i;
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
+		world->maps[i] = ld39_heightmap_zero;
 		whitgl_sys_update_model_from_data(i, 0, NULL);
-		whitgl_ivec p = {i%4, i/4};
-		whitgl_fvec offset = {(p.x-2)*(heightmap_size.x), (p.y-2)*(heightmap_size.y)};
-		whitgl_int j;
-		ld39_heightmap_new(&world->maps[i], whitgl_fvec_add(center, offset), i);
-		for(j=0; j<NUMBER_OF_FRAMES_PER_GEN+1; j++)
-			ld39_heightmap_do_some_generating(&world->maps[i]);
+		// whitgl_ivec p = {i%4, i/4};
+		// whitgl_fvec offset = {(p.x-2)*(heightmap_size.x), (p.y-2)*(heightmap_size.y)};
+		// whitgl_int j;
+		// ld39_heightmap_new(&world->maps[i], whitgl_fvec_add(center, offset), i);
+		// for(j=0; j<NUMBER_OF_FRAMES_PER_GEN+1; j++)
+		// 	ld39_heightmap_do_some_generating(&world->maps[i]);
 	}
-	world->current_gen = 0;
+	world->current_gen = -1;
 }
-void ld39_world_update(ld39_world* world)
+void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 {
-	if(world->maps[world->current_gen].active)
+	if(world->maps[world->current_gen].active || world->current_gen < 0)
 	{
 		// find the furthest existing
+		whitgl_fvec glider_pos_2d = {glider_pos.x, glider_pos.y};
+		whitgl_float best_dist = 0;
+		whitgl_int best_id = 0;
+		whitgl_int i;
+		for(i=0; i<MAX_ACTIVE_MAPS; i++)
+		{
+			if(!world->maps[i].active)
+			{
+				best_id = i;
+				break;
+			}
+
+			whitgl_fvec diff = whitgl_fvec_sub(world->maps[i].center, glider_pos_2d);
+			whitgl_float sqmag = whitgl_fvec_sqmagnitude(diff);
+			if(sqmag > best_dist)
+			{
+				best_id = i;
+				best_dist = sqmag;
+			}
+		}
+		world->maps[best_id].active = false;
 
 		// find the nearest unnoccupied potential
+		best_dist = whitgl_float_max;
+		whitgl_fvec best_center = whitgl_fvec_zero;
 
-		ld39_heightmap_new(&world->maps[0], world->maps[0].center, 0);
+		whitgl_fvec start_point = {whitgl_fnearest(glider_pos.x, heightmap_size.x), whitgl_fnearest(glider_pos.y, heightmap_size.y)};
+		const whitgl_int search_radius = 6;
+		for(i=0; i<search_radius*search_radius; i++)
+		{
+			whitgl_ivec p = {i%search_radius, i/search_radius};
+			whitgl_fvec offset = {(p.x-search_radius/2)*(heightmap_size.x), (p.y-search_radius/2)*(heightmap_size.y)};
+			whitgl_fvec center = whitgl_fvec_add(start_point, offset);
+			whitgl_fvec diff = whitgl_fvec_sub(center, glider_pos_2d);
+			whitgl_float sqmag = whitgl_fvec_sqmagnitude(diff);
+			if(sqmag > best_dist)
+				continue;
+			whitgl_int j;
+			whitgl_bool already_in_use = false;
+			for(j=0; j<MAX_ACTIVE_MAPS; j++)
+			{
+				if(!world->maps[j].active) continue;
+				if(!whitgl_fvec_eq(world->maps[j].center, center)) continue;
+				already_in_use = true;
+			}
+			if(already_in_use)
+				continue;
+			best_dist = sqmag;
+			best_center = center;
+		}
+
+		world->current_gen = best_id;
+		ld39_heightmap_new(&world->maps[best_id], best_center, best_id);
 	}
 	else
 	{

@@ -109,7 +109,7 @@ int main()
 			if(running == false)
 				break;
 			glider = ld39_glider_update(glider);
-			ld39_world_update(world);
+			ld39_world_update(world, glider.pos);
 		}
 		if(running == false)
 			break;

@@ -29,7 +29,7 @@ typedef struct
 } ld39_world;
 
 void ld39_world_generate(ld39_world* heightmap, whitgl_fvec center);
-void ld39_world_update(ld39_world* world);
+void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos);
 void ld39_world_draw(whitgl_fmat view, whitgl_ivec setup_size);
 
 
