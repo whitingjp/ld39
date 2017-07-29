@@ -31,6 +31,7 @@ typedef struct
 void ld39_world_generate(ld39_world* heightmap, whitgl_fvec center);
 void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos);
 void ld39_world_draw(whitgl_fmat view, whitgl_ivec setup_size);
+whitgl_float stacked_perlin2d(whitgl_float x, whitgl_float y, whitgl_int seed);
 
 
 #endif // WHITGL_HEIGHTMAP_H_

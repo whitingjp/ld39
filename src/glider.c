@@ -3,6 +3,7 @@
 #include <whitgl/input.h>
 #include <whitgl/logging.h>
 #include <whitgl/sys.h>
+#include <heightmap.h>
 
 
 	// more realistic maths that I couldn't get feeling right
@@ -83,4 +84,40 @@ whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider)
 	whitgl_fvec3 center = whitgl_fvec3_add(eye, forward);
 	whitgl_fmat view = whitgl_fmat_lookAt(eye, center, up);
 	return view;
+}
+
+void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
+{
+	whitgl_sys_enable_depth(false);
+	whitgl_int border = setup_size.x/32;
+	whitgl_iaabb altimeter_box = {{border, border}, {setup_size.x/16+border,setup_size.y-border}};
+	whitgl_sys_color altimeter_bg = {0xff,0xff,0xff,0x40};
+	whitgl_sys_draw_iaabb(altimeter_box, altimeter_bg);
+
+	whitgl_float max_altitude = 55.5;
+	whitgl_float altimeter_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, glider.pos.z/max_altitude);
+	whitgl_iaabb altimeter_player = {{altimeter_box.a.x, altimeter_pos-border/16}, {altimeter_box.b.x, altimeter_pos+border/16}};
+	whitgl_sys_color altimeter_player_col = {0xff,0xff,0xff,0xcc};
+	whitgl_sys_draw_iaabb(altimeter_player, altimeter_player_col);
+
+	whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
+	whitgl_float altimeter_ground_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, ground_height/max_altitude);
+	whitgl_iaabb altimeter_ground = {{altimeter_box.a.x, altimeter_ground_pos}, {altimeter_box.b.x, altimeter_box.b.y}};
+	whitgl_sys_color altimeter_ground_col = {0xff,0x00,0x00,0x40};
+	whitgl_sys_draw_iaabb(altimeter_ground, altimeter_ground_col);
+
+	whitgl_iaabb velocity_box = {{setup_size.x-border-setup_size.x/16, border}, {setup_size.x-border,setup_size.y-border}};
+	whitgl_sys_draw_iaabb(velocity_box, altimeter_bg);
+	whitgl_float max_velocity = 10;
+	whitgl_float velocity_pos = whitgl_finterpolate(velocity_box.b.y, velocity_box.a.y, glider.forward_speed/max_velocity);
+	whitgl_iaabb velocity_player = {{velocity_box.a.x, velocity_pos-border/16}, {velocity_box.b.x, velocity_pos+border/16}};
+	whitgl_sys_color velocity_player_col = {0xff,0xff,0xff,0xcc};
+	whitgl_sys_draw_iaabb(velocity_player, velocity_player_col);
+
+	whitgl_float stall_speed = 2;
+	whitgl_float stall_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, stall_speed/max_velocity);
+	whitgl_iaabb velocity_stall = {{velocity_box.a.x, stall_pos}, {velocity_box.b.x, velocity_box.b.y}};
+	whitgl_sys_color velocity_stall_col = {0xff,0x00,0x00,0x40};
+	whitgl_sys_draw_iaabb(velocity_stall, velocity_stall_col);
+
 }

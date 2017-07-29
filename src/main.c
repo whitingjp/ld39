@@ -120,6 +120,7 @@ int main()
 		whitgl_sys_draw_init(0);
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
 		ld39_world_draw(view, setup.size);
+		ld39_glider_draw_meters(glider, setup.size);
 		whitgl_sys_draw_finish();
 
 		frame++;
