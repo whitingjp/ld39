@@ -103,23 +103,6 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 			thermal.active = true;
 		}
 		heightmap->thermal = thermal;
-
-		ld39_tower tower = ld39_tower_zero;
-		if(true)
-		{
-			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
-			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
-			whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
-			whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)-2;
-			tower.pos.x = actual_pos.x;
-			tower.pos.y = actual_pos.y;
-			tower.pos.z = base_height;
-			tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
-			tower.active = true;
-		}
-		heightmap->tower = tower;
-
-
 		return;
 	}
 
@@ -166,6 +149,78 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos)
 }
 void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 {
+	if(world->maps[world->current_gen].active)
+	{
+		ld39_heightmap* heightmap = &world->maps[world->current_gen];
+		ld39_tower tower = ld39_tower_zero;
+		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.5)
+		{
+			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
+			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
+			whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
+			whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)-2;
+			tower.pos.x = actual_pos.x;
+			tower.pos.y = actual_pos.y;
+			tower.pos.z = base_height;
+			tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
+			tower.active = true;
+
+			while(tower.num_connections < MAX_CONNECTIONS)
+			{
+				whitgl_float best = whitgl_float_max;
+				whitgl_int best_id = -1;
+				whitgl_int i;
+				for(i=0; i<MAX_ACTIVE_MAPS; i++)
+				{
+					if(i==world->current_gen)
+						continue;
+
+					ld39_heightmap* other = &world->maps[i];
+					// if(!other->active)
+					// 	continue;
+
+					if(!other->tower.active)
+						continue;
+
+					if(other->tower.num_connections >= MAX_CONNECTIONS)
+						continue;
+
+					whitgl_int j;
+					whitgl_bool already_connected = false;
+					for(j=0; j<tower.num_connections; j++)
+					{
+						if(!whitgl_fvec3_eq(tower.connections[j], other->tower.pos))
+							continue;
+						already_connected = true;
+						break;
+					}
+					if(already_connected)
+						continue;
+
+					whitgl_fvec3 diff = whitgl_fvec3_sub(other->tower.pos, tower.pos);
+					whitgl_float sqmag = whitgl_fvec3_sqmagnitude(diff);
+
+					if(sqmag > 128*128)
+						continue;
+
+					if(sqmag >= best)
+						continue;
+
+					best = sqmag;
+					best_id = i;
+
+				}
+				if(best_id == -1)
+					break;
+				if(best > 64*64 && tower.num_connections > 0)
+					break;
+				ld39_heightmap* other = &world->maps[best_id];
+				tower.connections[tower.num_connections++] = other->tower.pos;
+				other->tower.connections[other->tower.num_connections++] = tower.pos;
+			}
+		}
+		heightmap->tower = tower;
+	}
 	if(world->maps[world->current_gen].active || world->current_gen < 0)
 	{
 		// find the furthest existing
@@ -243,6 +298,12 @@ void ld39_world_draw(ld39_world* world, whitgl_float time, whitgl_fmat view, whi
 		if(!world->maps[i].active)
 			continue;
 		ld39_tower_draw(world->maps[i].tower, view, perspective);
+	}
+	for(i=0; i<MAX_ACTIVE_MAPS; i++)
+	{
+		if(!world->maps[i].active)
+			continue;
+		ld39_tower_draw_connections(world->maps[i].tower, view, perspective);
 	}
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{

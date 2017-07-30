@@ -24,7 +24,7 @@ typedef struct
 	ld39_thermal thermal;
 	ld39_tower tower;
 } ld39_heightmap;
-static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0}};
+static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0, {}, 0}};
 
 #define MAX_ACTIVE_MAPS (30)
 typedef struct
