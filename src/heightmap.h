@@ -24,7 +24,7 @@ typedef struct
 } ld39_heightmap;
 static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero};
 
-#define MAX_ACTIVE_MAPS (31)
+#define MAX_ACTIVE_MAPS (30)
 typedef struct
 {
 	ld39_heightmap maps[MAX_ACTIVE_MAPS];

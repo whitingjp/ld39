@@ -19,8 +19,8 @@ uniform vec4 highcol;
 
 void main()
 {
-	vec3 normals = fragmentColor;
-	float variance = fragmentNormal.x;
+	vec3 normals = fragmentNormal;
+	float variance = fragmentColor.x;
 	float height = fragmentPosition.z/55.0+(variance-0.5)/10;
 
 	vec3 ambient = vec3(0.1,0.1,0.2);

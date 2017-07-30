@@ -1,6 +1,7 @@
 #include "thermal.h"
 
 #include <whitgl/sys.h>
+#include <assets.h>
 
 void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view, whitgl_fmat perspective)
 {
@@ -44,16 +45,16 @@ void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view
 		whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(b,a), whitgl_fvec3_sub(c,a));
 		normal = whitgl_fvec3_normalize(normal);
 
-		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
-		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
-		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
+		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
+		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
+		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
 
 		normal = whitgl_fvec3_inverse(normal);
-		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
-		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
-		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = colr; data[off++] = colg; data[off++] = colb;
+		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
+		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
+		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = colr; data[off++] = colg; data[off++] = colb; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z;
 
 	}
-	whitgl_sys_update_model_from_data(31, off/9, (char*)data);
-	whitgl_sys_draw_model(31, WHITGL_SHADER_EXTRA_1, whitgl_fmat_identity, view, perspective);
+	whitgl_sys_update_model_from_data(MDL_THERMAL, off/9, (char*)data);
+	whitgl_sys_draw_model(MDL_THERMAL, WHITGL_SHADER_EXTRA_1, whitgl_fmat_identity, view, perspective);
 }

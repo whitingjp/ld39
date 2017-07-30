@@ -12,6 +12,7 @@
 #include <whitgl/timer.h>
 #include <whitgl/profile.h>
 
+#include <assets.h>
 #include <heightmap.h>
 #include <glider.h>
 #include <thermal.h>
@@ -133,6 +134,10 @@ int main()
 	whitgl_int frame = 0;
 	// whitgl_profile_should_report(true);
 
+
+	whitgl_load_model(MDL_TOWER, "data/model/tower.wmd");
+
+
 	while(running)
 	{
 		whitgl_sound_update();
@@ -174,6 +179,13 @@ int main()
 		whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup.size.x/(float)setup.size.y, 0.1f, 1024.0f);
 
 		ld39_world_draw(world, time, view, perspective);
+
+		whitgl_float ground_height = stacked_perlin2d(1024*6,1024*6-32, 0);
+		whitgl_fvec3 translate = {1024*6,1024*6-32,ground_height-2};
+		whitgl_fmat mtranslate = whitgl_fmat_translate(translate);
+
+		whitgl_sys_draw_model(MDL_TOWER, WHITGL_SHADER_EXTRA_0, mtranslate, view, perspective);
+
 		ld39_glider_draw_meters(glider, setup.size);
 		whitgl_sys_draw_finish();
 
