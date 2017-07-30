@@ -3,14 +3,32 @@
 #include <whitgl/sys.h>
 #include <assets.h>
 
-void ld39_tower_draw(ld39_tower tower, whitgl_fmat view, whitgl_fmat perspective)
+void ld39_tower_draw(ld39_tower tower, live_connection_list* live_list, whitgl_fmat view, whitgl_fmat perspective)
 {
 	if(!tower.active)
 		return;
+	whitgl_int j;
+	whitgl_bool connected = false;
+	for(j=0; j<live_list->num_connections; j++)
+	{
+		whitgl_fvec3 connection = live_list->connections[j];
+		if(whitgl_fvec3_eq(connection, tower.pos))
+			connected = true;
+		if(connected)
+			break;
+	}
+
+	whitgl_sys_color boost_col = {0xef,0x2b,0xa8,0xff};
+	// boost_col = whitgl_sys_color_black;
+	if(connected)
+		whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 5, boost_col);
+
 	whitgl_fmat rotate = whitgl_fmat_rot_z(tower.rotate);
 	whitgl_fmat translate = whitgl_fmat_translate(tower.pos);
-	whitgl_fmat model =  whitgl_fmat_multiply(translate, rotate);
+	whitgl_fmat model = whitgl_fmat_multiply(translate, rotate);
 	whitgl_sys_draw_model(MDL_TOWER, WHITGL_SHADER_EXTRA_0, model, view, perspective);
+
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 5, whitgl_sys_color_black);
 }
 void ld39_tower_draw_connections(ld39_tower tower, live_connection_list* live_list, whitgl_fmat view, whitgl_fmat perspective)
 {

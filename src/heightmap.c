@@ -274,7 +274,7 @@ void ld39_world_draw(ld39_world* world, whitgl_float time, whitgl_fmat view, whi
 	{
 		if(!world->maps[i].active)
 			continue;
-		ld39_tower_draw(world->maps[i].tower, view, perspective);
+		ld39_tower_draw(world->maps[i].tower, &world->connections, view, perspective);
 	}
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{

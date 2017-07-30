@@ -10,6 +10,8 @@ uniform vec4 skycol;
 uniform vec4 lowcol;
 uniform vec4 medcol;
 uniform vec4 highcol;
+uniform vec4 boostcol;
+
 // void main()
 // {
 // 	vec3 normals = fragmentColor/2+0.5;
@@ -37,7 +39,7 @@ void main()
 	vec3 light = ambient+diffuse+specular;
 	float distance = length(eye-fragmentPosition);
 	// vec3 col = pow( vec3(material*light*0.5), vec3(1.0/2.2) );
-	vec3 col = material*light;
+	vec3 col = material*light+boostcol.rgb;
 	col = mix(col, skycol.rgb, clamp(distance/128,0,1));
 	outColor = vec4(col, 1.0);
 }

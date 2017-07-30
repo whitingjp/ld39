@@ -85,7 +85,7 @@ int main()
 	_load_shader_piece("data/shader/heightmap.gl", _piece_shader, 16384);
 	whitgl_shader heightmap_shader = whitgl_shader_zero;
 	heightmap_shader.fragment_src = _piece_shader;
-	heightmap_shader.num_uniforms = 5;
+	heightmap_shader.num_uniforms = 6;
 	heightmap_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC3;
 	heightmap_shader.uniforms[0].name = "eye";
 	heightmap_shader.uniforms[1].type = WHITGL_UNIFORM_COLOR;
@@ -96,6 +96,8 @@ int main()
 	heightmap_shader.uniforms[3].name = "medcol";
 	heightmap_shader.uniforms[4].type = WHITGL_UNIFORM_COLOR;
 	heightmap_shader.uniforms[4].name = "highcol";
+	heightmap_shader.uniforms[5].type = WHITGL_UNIFORM_COLOR;
+	heightmap_shader.uniforms[5].name = "boostcol";
 	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_0, heightmap_shader))
 		WHITGL_PANIC("failed to change shader");
 
