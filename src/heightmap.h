@@ -1,6 +1,8 @@
 #ifndef WHITGL_HEIGHTMAP_H_
 #define WHITGL_HEIGHTMAP_H_
 
+#include <stddef.h>
+
 #include <whitgl/math.h>
 #include <thermal.h>
 #include <tower.h>
@@ -23,14 +25,16 @@ typedef struct
 	whitgl_bool active;
 	ld39_thermal thermal;
 	ld39_tower tower;
+	whitgl_bool first_ever;
 } ld39_heightmap;
-static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0, {}, 0}};
+static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0, {}, 0}, false};
 
 #define MAX_ACTIVE_MAPS (30)
 typedef struct
 {
 	ld39_heightmap maps[MAX_ACTIVE_MAPS];
 	whitgl_int current_gen;
+	live_connection_list connections;
 } ld39_world;
 
 void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos);

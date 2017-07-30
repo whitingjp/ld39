@@ -54,12 +54,13 @@ whitgl_float stacked_perlin2d(whitgl_float x, whitgl_float y, whitgl_int seed)
 	return height;
 }
 
-void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center, whitgl_int model_id)
+void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center, whitgl_int model_id, whitgl_bool first_ever)
 {
 	heightmap->tri = 0;
 	heightmap->center = center;
 	heightmap->active = false;
 	heightmap->model_id = model_id;
+	heightmap->first_ever = first_ever;
 }
 
 #define NUMBER_OF_FRAMES_PER_GEN (32)
@@ -143,6 +144,7 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos)
 		whitgl_sys_update_model_from_data(i, 0, NULL);
 	}
 	world->current_gen = -1;
+	world->connections = live_connection_list_zero;
 
 	while(!world->maps[MAX_ACTIVE_MAPS/2].active)
 		ld39_world_update(world, glider_pos);
@@ -153,7 +155,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 	{
 		ld39_heightmap* heightmap = &world->maps[world->current_gen];
 		ld39_tower tower = ld39_tower_zero;
-		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.5)
+		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.5 || heightmap->first_ever)
 		{
 			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
 			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
@@ -217,12 +219,20 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 				ld39_heightmap* other = &world->maps[best_id];
 				tower.connections[tower.num_connections++] = other->tower.pos;
 				other->tower.connections[other->tower.num_connections++] = tower.pos;
+
+				if(other->first_ever)
+				{
+					live_connection connection = {tower.pos, other->tower.pos};
+					if(world->connections.num_connections < MAX_LIVE_CONNECTIONS)
+						world->connections.connections[world->connections.num_connections++] = connection;
+				}
 			}
 		}
 		heightmap->tower = tower;
 	}
 	if(world->maps[world->current_gen].active || world->current_gen < 0)
 	{
+		whitgl_bool first_ever = world->current_gen < 0;
 		// find the furthest existing
 		whitgl_fvec glider_pos_2d = {glider_pos.x, glider_pos.y};
 		whitgl_float best_dist = 0;
@@ -276,7 +286,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 		}
 
 		world->current_gen = best_id;
-		ld39_heightmap_new(&world->maps[best_id], best_center, best_id);
+		ld39_heightmap_new(&world->maps[best_id], best_center, best_id, first_ever);
 	}
 	else
 	{
@@ -303,7 +313,7 @@ void ld39_world_draw(ld39_world* world, whitgl_float time, whitgl_fmat view, whi
 	{
 		if(!world->maps[i].active)
 			continue;
-		ld39_tower_draw_connections(world->maps[i].tower, view, perspective);
+		ld39_tower_draw_connections(world->maps[i].tower, &world->connections, view, perspective);
 	}
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{

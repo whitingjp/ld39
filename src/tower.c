@@ -12,7 +12,7 @@ void ld39_tower_draw(ld39_tower tower, whitgl_fmat view, whitgl_fmat perspective
 	whitgl_fmat model =  whitgl_fmat_multiply(translate, rotate);
 	whitgl_sys_draw_model(MDL_TOWER, WHITGL_SHADER_EXTRA_0, model, view, perspective);
 }
-void ld39_tower_draw_connections(ld39_tower tower, whitgl_fmat view, whitgl_fmat perspective)
+void ld39_tower_draw_connections(ld39_tower tower, live_connection_list* live_list, whitgl_fmat view, whitgl_fmat perspective)
 {
 	if(!tower.active)
 		return;
@@ -31,9 +31,23 @@ void ld39_tower_draw_connections(ld39_tower tower, whitgl_fmat view, whitgl_fmat
 		whitgl_fvec3 c = {end.x, end.y, end.z+size};
 		whitgl_fvec3 d = {end.x, end.y, end.z-size};
 
+		whitgl_bool connected = false;
+
+		whitgl_int j;
+		for(j=0; j<live_list->num_connections; j++)
+		{
+			live_connection* connection = &live_list->connections[j];
+			if(whitgl_fvec3_eq(connection->a, tower.pos) && whitgl_fvec3_eq(connection->b, tower.connections[i]))
+				connected = true;
+			if(whitgl_fvec3_eq(connection->b, tower.pos) && whitgl_fvec3_eq(connection->a, tower.connections[i]))
+				connected = true;
+			if(connected)
+				break;
+		}
+
 		whitgl_sys_color live_connection_col = {0xef,0x2b,0xa8,0xff};
-		// whitgl_sys_color dead_connection_col = {0xfb,0xd5,0xbb,0x20};
-		whitgl_sys_color connection_col = live_connection_col;
+		whitgl_sys_color dead_connection_col = {0xfb,0xd5,0xbb,0x20};
+		whitgl_sys_color connection_col = connected ? live_connection_col : dead_connection_col;
 		whitgl_float colr = connection_col.r/255.0;
 		whitgl_float colg = connection_col.g/255.0;
 		whitgl_float colb = connection_col.b/255.0;
