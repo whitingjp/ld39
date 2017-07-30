@@ -5,6 +5,8 @@
 #include <whitgl/random.h>
 #include <whitgl/logging.h>
 
+#include <glider.h>
+
 
 whitgl_float noise2d(whitgl_int x, whitgl_int y, whitgl_int seed)
 {
@@ -83,17 +85,23 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 
 
 		ld39_thermal thermal = ld39_thermal_zero;
-		whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 1)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 2)-0.5};
-		whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
-		whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
-		whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)+2+12*noise2d(heightmap->center.x, heightmap->center.y, 3);
-		thermal.base.x = actual_pos.x;
-		thermal.base.y = actual_pos.y;
-		thermal.base.z = base_height;
-		thermal.height = ((whitgl_int)(noise2d(heightmap->center.x, heightmap->center.y, 5)*3)+1)*8;
-		// thermal.radius = 6 + 4*noise2d(actual_pos.x,actual_pos.y,4);
-		// thermal.height = 12 + 6*noise2d(actual_pos.x,actual_pos.y,5);
-		thermal.active = true;
+		whitgl_fvec gliderstart2d = {ld39_glider_zero.pos.x, ld39_glider_zero.pos.y};
+		whitgl_fvec diff = whitgl_fvec_sub(heightmap->center, gliderstart2d);
+		whitgl_float magnitude = whitgl_fvec_magnitude(diff);
+		if(noise2d(heightmap->center.x, heightmap->center.y, 6) < 1/(magnitude*0.01))
+		{
+			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 1)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 2)-0.5};
+			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
+			whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
+			whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)+2+12*noise2d(heightmap->center.x, heightmap->center.y, 3);
+			thermal.base.x = actual_pos.x;
+			thermal.base.y = actual_pos.y;
+			thermal.base.z = base_height;
+			thermal.height = ((whitgl_int)(noise2d(heightmap->center.x, heightmap->center.y, 5)*3)+1)*8;
+			// thermal.radius = 6 + 4*noise2d(actual_pos.x,actual_pos.y,4);
+			// thermal.height = 12 + 6*noise2d(actual_pos.x,actual_pos.y,5);
+			thermal.active = true;
+		}
 		heightmap->thermal = thermal;
 
 

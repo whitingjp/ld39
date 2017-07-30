@@ -38,6 +38,6 @@ void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view
 		data[off++] = pos.x+size; data[off++] = pos.y; data[off++] = pos.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
 
 	}
-	whitgl_sys_update_model_from_data(16, off/9, (char*)data);
-	whitgl_sys_draw_model(16, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
+	whitgl_sys_update_model_from_data(31, off/9, (char*)data);
+	whitgl_sys_draw_model(31, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
 }
