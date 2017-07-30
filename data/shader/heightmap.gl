@@ -9,6 +9,6 @@ void main()
 {
 	vec3 normals = fragmentColor/2+0.5;
 	float distance = length(eye-fragmentPosition);
-	vec3 col = mix(normals, vec3(0x1e/255.0,0x21/255.0,0x55/255.0), clamp(distance/64,0,1));
+	vec3 col = mix(normals, vec3(0x1e/255.0,0x21/255.0,0x55/255.0), clamp(distance/128,0,1));
 	outColor = vec4(col,1);
 }

@@ -90,8 +90,9 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 		thermal.base.x = actual_pos.x;
 		thermal.base.y = actual_pos.y;
 		thermal.base.z = base_height;
-		thermal.radius = 6 + 4*noise2d(actual_pos.x,actual_pos.y,4);
-		thermal.height = 12 + 6*noise2d(actual_pos.x,actual_pos.y,5);
+		thermal.height = ((whitgl_int)(noise2d(heightmap->center.x, heightmap->center.y, 5)*3)+1)*8;
+		// thermal.radius = 6 + 4*noise2d(actual_pos.x,actual_pos.y,4);
+		// thermal.height = 12 + 6*noise2d(actual_pos.x,actual_pos.y,5);
 		thermal.active = true;
 		heightmap->thermal = thermal;
 
@@ -137,7 +138,7 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos)
 	}
 	world->current_gen = -1;
 
-	while(!world->maps[8].active)
+	while(!world->maps[MAX_ACTIVE_MAPS/2].active)
 		ld39_world_update(world, glider_pos);
 }
 void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
