@@ -7,8 +7,8 @@
 #include <thermal.h>
 #include <tower.h>
 
-static const whitgl_ivec heightmap_size = {64, 64};
-#define heightmap_num_tris (64*64*4)
+static const whitgl_ivec heightmap_size = {96, 96};
+#define heightmap_num_tris (96*96*4)
 
 typedef struct
 {
@@ -18,6 +18,7 @@ typedef struct
 
 typedef struct
 {
+	whitgl_ivec position_id;
 	whitgl_fvec center;
 	whitgl_int model_id;
 	ld39_triangle tris[heightmap_num_tris];
@@ -27,9 +28,9 @@ typedef struct
 	ld39_tower tower;
 	whitgl_bool first_ever;
 } ld39_heightmap;
-static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0, {}, 0}, false};
+static const ld39_heightmap ld39_heightmap_zero = {{0,0},{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0, {}, 0}, false};
 
-#define MAX_ACTIVE_MAPS (30)
+#define MAX_ACTIVE_MAPS (16)
 typedef struct
 {
 	ld39_heightmap maps[MAX_ACTIVE_MAPS];

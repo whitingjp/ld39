@@ -17,7 +17,7 @@ whitgl_float noise2d(whitgl_int x, whitgl_int y, whitgl_int seed)
 	new_seed ^= whitgl_random_int(&seed_x, whitgl_int_max);
 	new_seed ^= whitgl_random_int(&seed_y, whitgl_int_max);
 	whitgl_random_seed sseed = whitgl_random_seed_init(new_seed);
-	return whitgl_fpow(whitgl_random_float(&sseed),2);
+	return whitgl_random_float(&sseed);
 }
 
 whitgl_float scurve(whitgl_float a)
@@ -33,10 +33,10 @@ whitgl_float perlin2d(whitgl_float x, whitgl_float y, whitgl_float spacing, whit
 	whitgl_int iy = y > 0 ? y : y-1;
 	whitgl_float x_part = whitgl_fwrap(x, 0, 1);
 	whitgl_float y_part = whitgl_fwrap(y, 0, 1);
-	whitgl_float tl = noise2d(ix,iy,seed);
-	whitgl_float tr = noise2d(ix+1,iy,seed);
-	whitgl_float bl = noise2d(ix,iy+1,seed);
-	whitgl_float br = noise2d(ix+1,iy+1,seed);
+	whitgl_float tl = whitgl_fpow(noise2d(ix,iy,seed),2);
+	whitgl_float tr = whitgl_fpow(noise2d(ix+1,iy,seed),2);
+	whitgl_float bl = whitgl_fpow(noise2d(ix,iy+1,seed),2);
+	whitgl_float br = whitgl_fpow(noise2d(ix+1,iy+1,seed),2);
 	whitgl_float t = whitgl_finterpolate(tl, tr, scurve(x_part));
 	whitgl_float b = whitgl_finterpolate(bl, br, scurve(x_part));
 	return whitgl_finterpolate(t, b, scurve(y_part));
@@ -61,9 +61,10 @@ void ld39_heightmap_new(ld39_heightmap* heightmap, whitgl_fvec center, whitgl_in
 	heightmap->active = false;
 	heightmap->model_id = model_id;
 	heightmap->first_ever = first_ever;
+	heightmap->position_id = whitgl_ivec_divide(whitgl_fvec_to_ivec(center), heightmap_size);
 }
 
-#define NUMBER_OF_FRAMES_PER_GEN (32)
+#define NUMBER_OF_FRAMES_PER_GEN (32*4)
 void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 {
 	if(heightmap->tri == heightmap_num_tris)
@@ -155,7 +156,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 	{
 		ld39_heightmap* heightmap = &world->maps[world->current_gen];
 		ld39_tower tower = ld39_tower_zero;
-		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.0 || heightmap->first_ever)
+		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.25)
 		{
 			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
 			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
@@ -166,80 +167,35 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 			tower.pos.z = base_height;
 			// tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
 			tower.active = true;
-
-			while(tower.num_connections < MAX_CONNECTIONS)
-			{
-				whitgl_float best = whitgl_float_max;
-				whitgl_int best_id = -1;
-				whitgl_int i;
-				for(i=0; i<MAX_ACTIVE_MAPS; i++)
-				{
-					if(i==world->current_gen)
-						continue;
-
-					ld39_heightmap* other = &world->maps[i];
-					// if(!other->active)
-					// 	continue;
-
-					if(!other->tower.active)
-						continue;
-
-					if(other->tower.num_connections >= MAX_CONNECTIONS)
-						continue;
-
-					whitgl_int j;
-					whitgl_bool already_connected = false;
-					for(j=0; j<tower.num_connections; j++)
-					{
-						if(!whitgl_fvec3_eq(tower.connections[j], other->tower.pos))
-							continue;
-						already_connected = true;
-						break;
-					}
-					if(already_connected)
-						continue;
-
-					whitgl_bool existing_connection = false;
-					for(j=0; j<other->tower.num_connections; j++)
-					{
-						if(!whitgl_fvec3_eq(other->tower.connections[j], tower.pos))
-							continue;
-						existing_connection = true;
-					}
-					if(existing_connection)
-					{
-						WHITGL_LOG("existing connection %.2f %.2f %.2f %.2f %.2f %.2f", tower.pos.x,tower.pos.y,tower.pos.z,other->tower.pos.x,other->tower.pos.y,other->tower.pos.z);
-						tower.connections[tower.num_connections++] = other->tower.pos;
-					}
-
-					whitgl_fvec3 diff = whitgl_fvec3_sub(other->tower.pos, tower.pos);
-					whitgl_float sqmag = whitgl_fvec3_sqmagnitude(diff);
-
-					if(sqmag > 128*128)
-						continue;
-
-					if(sqmag >= best)
-						continue;
-
-					best = sqmag;
-					best_id = i;
-
-				}
-				if(tower.num_connections >= MAX_CONNECTIONS) // this could occur if restoring a bunch of existing connections
-					break;
-				if(best_id == -1)
-					break;
-				if(best > 64*64 && tower.num_connections > 0)
-					break;
-				ld39_heightmap* other = &world->maps[best_id];
-				tower.connections[tower.num_connections++] = other->tower.pos;
-				other->tower.connections[other->tower.num_connections++] = tower.pos;
-				WHITGL_LOG("connected %d %d %.2f %.2f %.2f to %d %.2f %.2f %.2f", whitgl_fvec3_eq(other->tower.pos, tower.pos), tower.num_connections, tower.pos.x, tower.pos.y, tower.pos.z, other->tower.num_connections, other->tower.pos.x,  other->tower.pos.y,  other->tower.pos.z);
-			}
 		}
 		heightmap->tower = tower;
 		if(heightmap->first_ever)
 			world->connections.connections[world->connections.num_connections++] = tower.pos;
+		whitgl_int i;
+		for(i=0; i<MAX_ACTIVE_MAPS; i++)
+		{
+			ld39_heightmap* heightmap = &world->maps[i];
+			if(!heightmap->active)
+				continue;
+			ld39_tower* tower = &heightmap->tower;
+			if(!tower->active)
+				continue;
+			tower->num_connections = 0;
+			whitgl_int j;
+			for(j=0; j<MAX_ACTIVE_MAPS; j++)
+			{
+				ld39_heightmap* other = &world->maps[j];
+				if(!other->active)
+					continue;
+				if(!other->tower.active)
+					continue;
+				whitgl_ivec id_diff = whitgl_ivec_sub(heightmap->position_id, other->position_id);
+				whitgl_float dist = whitgl_fvec_magnitude(whitgl_ivec_to_fvec(id_diff));
+				if(dist < 0.99 || dist > 1.01)
+					continue;
+				tower->connections[tower->num_connections++] = other->tower.pos;
+			}
+		}
 	}
 	if(world->maps[world->current_gen].active || world->current_gen < 0)
 	{

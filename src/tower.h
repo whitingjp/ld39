@@ -3,7 +3,7 @@
 
 #include <whitgl/math.h>
 
-#define MAX_CONNECTIONS (3)
+#define MAX_CONNECTIONS (4)
 
 #define MAX_LIVE_CONNECTIONS (1024)
 
