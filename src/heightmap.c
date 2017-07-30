@@ -155,7 +155,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 	{
 		ld39_heightmap* heightmap = &world->maps[world->current_gen];
 		ld39_tower tower = ld39_tower_zero;
-		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.5 || heightmap->first_ever)
+		if(noise2d(heightmap->center.x, heightmap->center.y, 9) > 0.0 || heightmap->first_ever)
 		{
 			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
 			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
@@ -199,6 +199,19 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 					if(already_connected)
 						continue;
 
+					whitgl_bool existing_connection = false;
+					for(j=0; j<other->tower.num_connections; j++)
+					{
+						if(!whitgl_fvec3_eq(other->tower.connections[j], tower.pos))
+							continue;
+						existing_connection = true;
+					}
+					if(existing_connection)
+					{
+						WHITGL_LOG("existing connection %.2f %.2f %.2f %.2f %.2f %.2f", tower.pos.x,tower.pos.y,tower.pos.z,other->tower.pos.x,other->tower.pos.y,other->tower.pos.z);
+						tower.connections[tower.num_connections++] = other->tower.pos;
+					}
+
 					whitgl_fvec3 diff = whitgl_fvec3_sub(other->tower.pos, tower.pos);
 					whitgl_float sqmag = whitgl_fvec3_sqmagnitude(diff);
 
@@ -212,6 +225,8 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 					best_id = i;
 
 				}
+				if(tower.num_connections >= MAX_CONNECTIONS) // this could occur if restoring a bunch of existing connections
+					break;
 				if(best_id == -1)
 					break;
 				if(best > 64*64 && tower.num_connections > 0)
@@ -219,16 +234,12 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 				ld39_heightmap* other = &world->maps[best_id];
 				tower.connections[tower.num_connections++] = other->tower.pos;
 				other->tower.connections[other->tower.num_connections++] = tower.pos;
-
-				if(other->first_ever)
-				{
-					live_connection connection = {tower.pos, other->tower.pos};
-					if(world->connections.num_connections < MAX_LIVE_CONNECTIONS)
-						world->connections.connections[world->connections.num_connections++] = connection;
-				}
+				WHITGL_LOG("connected %d %d %.2f %.2f %.2f to %d %.2f %.2f %.2f", whitgl_fvec3_eq(other->tower.pos, tower.pos), tower.num_connections, tower.pos.x, tower.pos.y, tower.pos.z, other->tower.num_connections, other->tower.pos.x,  other->tower.pos.y,  other->tower.pos.z);
 			}
 		}
 		heightmap->tower = tower;
+		if(heightmap->first_ever)
+			world->connections.connections[world->connections.num_connections++] = tower.pos;
 	}
 	if(world->maps[world->current_gen].active || world->current_gen < 0)
 	{

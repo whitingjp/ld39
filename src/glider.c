@@ -30,7 +30,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 {
 	glider.camera_shake = 0;
 	glider.last_pos = glider.pos;
-	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
+	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/30));
 	glider.pos.z += glider.thermal_lift/120;
 	glider.thermal_lift = glider.thermal_lift*0.99;
 

@@ -211,6 +211,47 @@ int main()
 				whitgl_bool side_old = side_of_plane(glider.last_pos, tower.pos, plane_normal);
 				if(side_new == side_old)
 					continue;
+				WHITGL_LOG("checking %.2f %.2f %.2f", tower.pos.x, tower.pos.y, tower.pos.z);
+
+				whitgl_bool connected = false;
+				whitgl_int j;
+				for(j=0; j<world->connections.num_connections; j++)
+				{
+					whitgl_fvec3 connection = world->connections.connections[j];
+					if(whitgl_fvec3_eq(connection, tower.pos))
+						connected = true;
+					if(connected)
+						break;
+				}
+				if(connected)
+				{
+					WHITGL_LOG("already in");
+					continue; // already in
+				}
+
+				whitgl_bool ready_to_connect = false;
+				for(j=0; j<world->connections.num_connections; j++)
+				{
+					whitgl_fvec3 connection = world->connections.connections[j];
+					whitgl_int k;
+					WHITGL_LOG("tower.num_connections %d", tower.num_connections);
+					for(k=0; k<tower.num_connections; k++)
+					{
+						WHITGL_LOG("connection %.2f,%.2f,%.2f  tower.connections[k] %.2f,%.2f,%.2f", connection.x,connection.y,connection.z, tower.connections[k].x,tower.connections[k].y,tower.connections[k].z);
+						if(whitgl_fvec3_eq(connection, tower.connections[k]))
+							ready_to_connect = true;
+					}
+					if(ready_to_connect)
+						break;
+				}
+				if(!ready_to_connect)
+				{
+					WHITGL_LOG("not ready");
+					continue;
+				}
+
+				if(world->connections.num_connections < MAX_LIVE_CONNECTIONS)
+					world->connections.connections[world->connections.num_connections++] = tower.pos;
 				WHITGL_LOG("YAY");
 			}
 

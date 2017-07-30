@@ -38,10 +38,8 @@ void ld39_tower_draw_connections(ld39_tower tower, live_connection_list* live_li
 		whitgl_int j;
 		for(j=0; j<live_list->num_connections; j++)
 		{
-			live_connection* connection = &live_list->connections[j];
-			if(whitgl_fvec3_eq(connection->a, tower.pos) && whitgl_fvec3_eq(connection->b, tower.connections[i]))
-				connected = true;
-			if(whitgl_fvec3_eq(connection->b, tower.pos) && whitgl_fvec3_eq(connection->a, tower.connections[i]))
+			whitgl_fvec3 connection = live_list->connections[j];
+			if(whitgl_fvec3_eq(connection, tower.pos) || whitgl_fvec3_eq(connection, tower.connections[i]))
 				connected = true;
 			if(connected)
 				break;
