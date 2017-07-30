@@ -90,6 +90,17 @@ int main()
 	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_0, heightmap_shader))
 		WHITGL_PANIC("failed to change shader");
 
+	_load_shader_piece("data/shader/thermal.gl", _piece_shader, 16384);
+	whitgl_shader thermal_shader = whitgl_shader_zero;
+	thermal_shader.fragment_src = _piece_shader;
+	thermal_shader.num_uniforms = 2;
+	thermal_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC3;
+	thermal_shader.uniforms[0].name = "eye";
+	thermal_shader.uniforms[1].type = WHITGL_UNIFORM_COLOR;
+	thermal_shader.uniforms[1].name = "skycol";
+	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_1, thermal_shader))
+		WHITGL_PANIC("failed to change shader");
+
 	// whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
 	// whitgl_sys_color sky = {0xff,0xee,0xc4};
 	whitgl_sys_color sky = {0x19,0x05,0x02,0xff};
@@ -100,6 +111,7 @@ int main()
 	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 2, low);
 	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 3, med);
 	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 4, high);
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_1, 1, sky);
 
 
 	whitgl_sys_set_clear_color(sky);

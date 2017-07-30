@@ -98,6 +98,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	glider.shake_offset = whitgl_fvec3_interpolate(glider.shake_offset, glider.target_shake_offset, 0.1);
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
+	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
 
 	return glider;
 }
