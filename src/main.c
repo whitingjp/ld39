@@ -76,14 +76,31 @@ int main()
 	_load_shader_piece("data/shader/heightmap.gl", _piece_shader, 16384);
 	whitgl_shader heightmap_shader = whitgl_shader_zero;
 	heightmap_shader.fragment_src = _piece_shader;
-	heightmap_shader.num_uniforms = 1;
+	heightmap_shader.num_uniforms = 5;
 	heightmap_shader.uniforms[0].type = WHITGL_UNIFORM_FVEC3;
 	heightmap_shader.uniforms[0].name = "eye";
+	heightmap_shader.uniforms[1].type = WHITGL_UNIFORM_COLOR;
+	heightmap_shader.uniforms[1].name = "skycol";
+	heightmap_shader.uniforms[2].type = WHITGL_UNIFORM_COLOR;
+	heightmap_shader.uniforms[2].name = "lowcol";
+	heightmap_shader.uniforms[3].type = WHITGL_UNIFORM_COLOR;
+	heightmap_shader.uniforms[3].name = "medcol";
+	heightmap_shader.uniforms[4].type = WHITGL_UNIFORM_COLOR;
+	heightmap_shader.uniforms[4].name = "highcol";
 	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_0, heightmap_shader))
 		WHITGL_PANIC("failed to change shader");
 
-	whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
+	// whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
 	// whitgl_sys_color sky = {0xff,0xee,0xc4};
+	whitgl_sys_color sky = {0x19,0x05,0x02,0xff};
+	whitgl_sys_color low = {0x9a,0x50,0x50,0xff};
+	whitgl_sys_color med = {0xb9,0x8e,0x63,0xff};
+	whitgl_sys_color high = {0xd2,0xdb,0xc3,0xff};
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 1, sky);
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 2, low);
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 3, med);
+	whitgl_set_shader_color(WHITGL_SHADER_EXTRA_0, 4, high);
+
 
 	whitgl_sys_set_clear_color(sky);
 
