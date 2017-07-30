@@ -83,6 +83,8 @@ int main()
 		WHITGL_PANIC("failed to change shader");
 
 	whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
+	// whitgl_sys_color sky = {0xff,0xee,0xc4};
+
 	whitgl_sys_set_clear_color(sky);
 
 	WHITGL_LOG("Initiating sound");
