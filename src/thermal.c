@@ -27,15 +27,24 @@ void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view
 		if(pos.z < thermal.base.z+1)
 			size = pos.z-thermal.base.z;
 
-		size /= 2;
+		size /= 4;
 
-		data[off++] = pos.x+size/2; data[off++] = pos.y; data[off++] = pos.z+size; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = pos.x+size; data[off++] = pos.y; data[off++] = pos.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = pos.x; data[off++] = pos.y; data[off++] = pos.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		whitgl_fvec3 a = {0, 0, size};
+		whitgl_fvec3 b = {size, 0, -size};
+		whitgl_fvec3 c = {-size, 0, -size};
+		whitgl_fmat spin = whitgl_fmat_rot_z((time/2.0+i/8.0)*whitgl_tau);
+		a = whitgl_fvec3_add(pos, whitgl_fvec3_apply_fmat(a, spin));
+		b = whitgl_fvec3_add(pos, whitgl_fvec3_apply_fmat(b, spin));
+		c = whitgl_fvec3_add(pos, whitgl_fvec3_apply_fmat(c, spin));
 
-		data[off++] = pos.x+size/2; data[off++] = pos.y; data[off++] = pos.z+size; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = pos.x; data[off++] = pos.y; data[off++] = pos.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-		data[off++] = pos.x+size; data[off++] = pos.y; data[off++] = pos.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+
+		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+
+		data[off++] = a.x; data[off++] = a.y; data[off++] = a.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = c.x; data[off++] = c.y; data[off++] = c.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+		data[off++] = b.x; data[off++] = b.y; data[off++] = b.z; data[off++] = 1; data[off++] = 1; data[off++] = 0; data[off++] = 0; data[off++] = 0; data[off++] = 0;
 
 	}
 	whitgl_sys_update_model_from_data(31, off/9, (char*)data);
