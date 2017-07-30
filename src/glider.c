@@ -133,8 +133,9 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.camera_shake += glider.stall_factor*2;
 	}
 
-	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0)
+	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0 && glider.num_boosts > 0)
 	{
+		glider.num_boosts--;
 		glider.boost = 1.0;
 		whitgl_sound_play(SOUND_BOOST, 1.0, 1.0);
 	}
@@ -146,8 +147,6 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.forward_speed += 0.01*boost_factor;
 		glider.camera_shake += boost_factor*2;
 	}
-
-
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
@@ -241,5 +240,22 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_iaabb too_fast_box = {{velocity_box.a.x, velocity_box.a.y}, {velocity_box.b.x, too_fast_pos}};
 	whitgl_sys_color too_fast_col = {0xff,0xff,0x00,0x40};
 	whitgl_sys_draw_iaabb(too_fast_box, too_fast_col);
+
+	whitgl_int i;
+	for(i=0; i<3; i++)
+	{
+		whitgl_float boost_divider = setup_size.x/8;
+		whitgl_fcircle circle = {{boost_divider*(i+3), setup_size.y-setup_size.y/8}, setup_size.y/16};
+		whitgl_sys_draw_fcircle(circle, altimeter_bg, 32);
+
+		whitgl_sys_color live_connection_col = {0xef,0x2b,0xa8,0x80};
+		if(glider.num_boosts > i)
+			whitgl_sys_draw_fcircle(circle, live_connection_col, 32);
+		if(glider.num_boosts == i)
+		{
+			circle.size *= whitgl_fpow(glider.boost, 2);
+			whitgl_sys_draw_fcircle(circle, live_connection_col, 32);
+		}
+	}
 
 }

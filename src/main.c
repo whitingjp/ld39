@@ -271,6 +271,8 @@ int main()
 					world->connections.connections[world->connections.num_connections++] = tower.pos;
 				// WHITGL_LOG("YAY");
 				whitgl_sound_play(SOUND_POWER_ON, 1.0, 1.0);
+				if(glider.num_boosts < 3)
+					glider.num_boosts++;
 			}
 
 			for(i=0; i<MAX_ACTIVE_MAPS; i++)

@@ -23,10 +23,11 @@ typedef struct
 	whitgl_float stall_factor;
 	whitgl_float thermal_lift;
 
+	whitgl_int num_boosts;
 	whitgl_bool alive;
 } ld39_glider;
 
-static const ld39_glider ld39_glider_zero = {{1024*4.5,1024*4.5,48},{1024*4.5,1024*4.5,48},{0,0,0,1},{0,-1,0},3,0,{0,0}, 0, 0, whitgl_random_seed_zero, {0,0,0}, {0,0,0}, 0, 0, true};
+static const ld39_glider ld39_glider_zero = {{1024*4.5,1024*4.5,48},{1024*4.5,1024*4.5,48},{0,0,0,1},{0,-1,0},3,0,{0,0}, 0, 0, whitgl_random_seed_zero, {0,0,0}, {0,0,0}, 0, 0, 2, true};
 ld39_glider ld39_glider_update(ld39_glider glider);
 whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider);
 void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size);
