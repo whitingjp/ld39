@@ -11,6 +11,7 @@
 #include <whitgl/sys.h>
 #include <whitgl/timer.h>
 #include <whitgl/profile.h>
+#include <whitgl/random.h>
 
 #include <assets.h>
 #include <heightmap.h>
@@ -153,6 +154,7 @@ int main()
 	whitgl_int frame = 0;
 	// whitgl_profile_should_report(true);
 
+	whitgl_random_seed thermal_seed = whitgl_random_seed_init(2515);
 
 	whitgl_load_model(MDL_TOWER, "data/model/tower.wmd");
 
@@ -162,6 +164,10 @@ int main()
 	whitgl_loop_add(SOUND_STALL, "data/sound/stall.wav");
 	whitgl_loop_volume(SOUND_STALL, 0.00);
 	whitgl_loop_set_paused(SOUND_STALL, false);
+
+	whitgl_loop_add(SOUND_LIVE_WIRE, "data/sound/live_wire.wav");
+	whitgl_loop_volume(SOUND_LIVE_WIRE, 0.00);
+	whitgl_loop_set_paused(SOUND_LIVE_WIRE, false);
 
 	whitgl_sound_add(SOUND_CRASH, "data/sound/crash.wav");
 	whitgl_sound_add(SOUND_POWER_ON, "data/sound/power_on.wav");
@@ -198,6 +204,8 @@ int main()
 				whitgl_fvec diff = whitgl_fvec_sub(glider2d, base2d);
 				if(thermal.active && whitgl_fvec_magnitude(diff) < thermal.radius && glider.pos.z > thermal.base.z && glider.pos.z < thermal.base.z+thermal.height)
 				{
+					if(whitgl_random_float(&thermal_seed) > 0.9)
+						whitgl_sound_play(SOUND_THERMAL, whitgl_random_float(&thermal_seed)*0.1, whitgl_random_float(&thermal_seed)+0.5);
 					glider.thermal_lift += 0.015;
 				}
 			}
@@ -330,6 +338,37 @@ int main()
 				whitgl_sound_play(SOUND_CRASH, 1.0, 1.0);
 
 			}
+
+			whitgl_float live_wire_vol = 0;
+			for(i=0; i<MAX_ACTIVE_MAPS; i++)
+			{
+				if(!world->maps[i].active)
+					continue;
+				ld39_tower tower = world->maps[i].tower;
+				if(!tower.active)
+					continue;
+				whitgl_fvec3 mid_offset = {0,0,17};
+				whitgl_float sound_radius = 64;
+				whitgl_fvec3 mid_pos = whitgl_fvec3_add(tower.pos, mid_offset);
+				whitgl_fvec3 diff = whitgl_fvec3_sub(mid_pos, glider.pos);
+
+				whitgl_float mag = whitgl_fvec3_magnitude(diff);
+				if(mag > sound_radius)
+					continue;
+
+				whitgl_bool we_active = false;
+				whitgl_int j;
+				for(j=0; j<world->connections.num_connections; j++)
+				{
+					if(whitgl_fvec3_eq(world->connections.connections[j], tower.pos))
+						we_active = true;
+				}
+				if(!we_active)
+					continue;
+				live_wire_vol += whitgl_fpow(1-mag/sound_radius, 2);
+			}
+			whitgl_loop_volume(SOUND_LIVE_WIRE, live_wire_vol*0.5);
+
 
 			whitgl_float air_speed = whitgl_fvec3_magnitude(glider.speed);
 			whitgl_float joystick_speed = whitgl_fvec_magnitude(glider.joystick);

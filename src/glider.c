@@ -53,7 +53,10 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 			glider.speed.z = -glider.speed.z;
 			glider.pos = glider.last_pos;
 			if(velocity > 1)
+			{
 				whitgl_sound_play(SOUND_CRASH, 0.2, 0.75);
+				glider.camera_shake += 2;
+			}
 		}
 		if(velocity < 0.1) velocity = 0;
 		whitgl_fvec3 pitch_axis = {0,0,1};
