@@ -180,11 +180,6 @@ int main()
 
 		ld39_world_draw(world, time, view, perspective);
 
-		whitgl_float ground_height = stacked_perlin2d(1024*6,1024*6-32, 0);
-		whitgl_fvec3 translate = {1024*6,1024*6-32,ground_height-2};
-		whitgl_fmat mtranslate = whitgl_fmat_translate(translate);
-
-		whitgl_sys_draw_model(MDL_TOWER, WHITGL_SHADER_EXTRA_0, mtranslate, view, perspective);
 
 		ld39_glider_draw_meters(glider, setup.size);
 		whitgl_sys_draw_finish();

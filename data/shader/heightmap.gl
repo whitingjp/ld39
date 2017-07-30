@@ -4,6 +4,7 @@ uniform vec3 eye;
 in vec3 fragmentColor;
 in vec3 fragmentNormal;
 in vec3 fragmentPosition;
+in mat4 normalMatrix;
 out vec4 outColor;
 uniform vec4 skycol;
 uniform vec4 lowcol;
@@ -19,7 +20,7 @@ uniform vec4 highcol;
 
 void main()
 {
-	vec3 normals = fragmentNormal;
+	vec3 normals = vec3(normalMatrix * vec4(fragmentNormal,1));
 	float variance = fragmentColor.x;
 	float height = fragmentPosition.z/55.0+(variance-0.5)/10;
 

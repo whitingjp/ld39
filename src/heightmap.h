@@ -3,6 +3,7 @@
 
 #include <whitgl/math.h>
 #include <thermal.h>
+#include <tower.h>
 
 static const whitgl_ivec heightmap_size = {64, 64};
 #define heightmap_num_tris (64*64*4)
@@ -21,8 +22,9 @@ typedef struct
 	whitgl_int tri;
 	whitgl_bool active;
 	ld39_thermal thermal;
+	ld39_tower tower;
 } ld39_heightmap;
-static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero};
+static const ld39_heightmap ld39_heightmap_zero = {{0,0}, 0, {}, 0, false, ld39_thermal_zero, {false, {0,0,0}, 0}};
 
 #define MAX_ACTIVE_MAPS (30)
 typedef struct

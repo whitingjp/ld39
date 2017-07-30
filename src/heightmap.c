@@ -104,6 +104,21 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 		}
 		heightmap->thermal = thermal;
 
+		ld39_tower tower = ld39_tower_zero;
+		if(true)
+		{
+			whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 6)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 7)-0.5};
+			whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
+			whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
+			whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)-2;
+			tower.pos.x = actual_pos.x;
+			tower.pos.y = actual_pos.y;
+			tower.pos.z = base_height;
+			tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
+			tower.active = true;
+		}
+		heightmap->tower = tower;
+
 
 		return;
 	}
@@ -222,6 +237,12 @@ void ld39_world_draw(ld39_world* world, whitgl_float time, whitgl_fmat view, whi
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
 		whitgl_sys_draw_model(i, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
+	}
+	for(i=0; i<MAX_ACTIVE_MAPS; i++)
+	{
+		if(!world->maps[i].active)
+			continue;
+		ld39_tower_draw(world->maps[i].tower, view, perspective);
 	}
 	for(i=0; i<MAX_ACTIVE_MAPS; i++)
 	{
