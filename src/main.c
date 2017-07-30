@@ -163,7 +163,7 @@ int main()
 				whitgl_fvec diff = whitgl_fvec_sub(glider2d, base2d);
 				if(thermal.active && whitgl_fvec_magnitude(diff) < thermal.radius && glider.pos.z > thermal.base.z && glider.pos.z < thermal.base.z+thermal.height)
 				{
-					glider.thermal_lift += 0.02;
+					glider.thermal_lift += 0.01;
 				}
 			}
 		}
