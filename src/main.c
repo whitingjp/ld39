@@ -203,7 +203,8 @@ int main()
 				whitgl_fvec3 mid_pos = whitgl_fvec3_add(tower.pos, mid_offset);
 				whitgl_fvec3 diff = whitgl_fvec3_sub(mid_pos, glider.pos);
 
-				if(whitgl_fvec3_magnitude(diff) > mid_radius)
+				whitgl_float mag = whitgl_fvec3_magnitude(diff);
+				if(mag > mid_radius)
 					continue;
 
 				whitgl_fvec3 plane_normal = {0,1,0};
@@ -251,6 +252,69 @@ int main()
 					world->connections.connections[world->connections.num_connections++] = tower.pos;
 				WHITGL_LOG("YAY");
 			}
+
+			for(i=0; i<MAX_ACTIVE_MAPS; i++)
+			{
+				if(!world->maps[i].active)
+					continue;
+				ld39_tower tower = world->maps[i].tower;
+				if(!tower.active)
+					continue;
+				whitgl_fvec3 mid_offset = {0,0,17};
+				whitgl_float mid_radius = 4;
+				whitgl_float outer_radius = 5;
+				whitgl_fvec3 mid_pos = whitgl_fvec3_add(tower.pos, mid_offset);
+				whitgl_fvec3 diff = whitgl_fvec3_sub(mid_pos, glider.pos);
+
+				whitgl_float mag = whitgl_fvec3_magnitude(diff);
+				if(mag < mid_radius || mag > outer_radius)
+					continue;
+				whitgl_fvec3 plane_normal = {0,1,0};
+				whitgl_fmat rot = whitgl_fmat_rot_z(tower.rotate);
+				plane_normal = whitgl_fvec3_apply_fmat(plane_normal, rot);
+
+				whitgl_fvec3 direction = whitgl_fvec3_sub(glider.pos, tower.pos);
+				whitgl_float dot = whitgl_fvec3_dot(direction, plane_normal);
+				if(dot < 1 || dot > 1)
+					continue;
+
+				glider.alive = false;
+				glider.camera_shake += 10;
+				glider.speed = whitgl_fvec3_scale_val(glider.speed, -0.5);
+				glider.pos = glider.last_pos;
+			}
+
+			for(i=0; i<MAX_ACTIVE_MAPS; i++)
+			{
+				if(!world->maps[i].active)
+					continue;
+				ld39_tower tower = world->maps[i].tower;
+				if(!tower.active)
+					continue;
+				whitgl_fvec3 mid_offset = {0,0,17};
+				whitgl_float mid_radius = 4;
+				whitgl_fvec3 mid_pos = whitgl_fvec3_add(tower.pos, mid_offset);
+				whitgl_fvec3 diff = whitgl_fvec3_sub(mid_pos, glider.pos);
+
+				whitgl_float mag = whitgl_fvec3_magnitude(diff);
+				if(mag < mid_radius)
+					continue;
+
+				if(glider.pos.z > tower.pos.z+25)
+					continue;
+
+				whitgl_fvec glider2d = {glider.pos.x, glider.pos.y};
+				whitgl_fvec tower2d = {tower.pos.x, tower.pos.y};
+				whitgl_fvec diff2d = whitgl_fvec_sub(glider2d, tower2d);
+				if(whitgl_fvec_magnitude(diff2d) > 0.5)
+					continue;
+
+				glider.alive = false;
+				glider.camera_shake += 10;
+				glider.speed = whitgl_fvec3_scale_val(glider.speed, -0.5);
+				glider.pos = glider.last_pos;
+			}
+
 
 
 		}

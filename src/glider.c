@@ -28,6 +28,35 @@
 
 ld39_glider ld39_glider_update(ld39_glider glider)
 {
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.x = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.y = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	if(whitgl_random_float(&glider.shake_seed) > 0.9)
+		glider.target_shake_offset.z = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
+	glider.shake_offset = whitgl_fvec3_interpolate(glider.shake_offset, glider.target_shake_offset, 0.1);
+	if(!glider.alive)
+	{
+		glider.last_pos = glider.pos;
+		glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/30));
+		glider.speed.z -= 0.02;
+		glider.camera_shake = glider.camera_shake*0.95;
+		whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
+		whitgl_float height = glider.pos.z-ground_height;
+		if(height < 0.5)
+		{
+			glider.speed = whitgl_fvec3_scale_val(glider.speed, 0.5);
+			glider.speed.z = -glider.speed.z;
+			glider.pos = glider.last_pos;
+		}
+		whitgl_float velocity = whitgl_fvec3_magnitude(glider.speed);
+		if(velocity < 0.1) velocity = 0;
+		whitgl_fvec3 pitch_axis = {0,0,1};
+		whitgl_quat pitch = whitgl_quat_rotate(-velocity/32, pitch_axis);
+		glider.facing = whitgl_quat_multiply(pitch, glider.facing);
+		return glider;
+	}
+
 	glider.camera_shake = 0;
 	glider.last_pos = glider.pos;
 	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/30));
@@ -61,6 +90,15 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
 	whitgl_float height = glider.pos.z-ground_height;
 	whitgl_float drag_factor = height < 4 ? 1 : 0.9998;
+	if(height < 0.5)
+	{
+		glider.alive = false;
+		glider.camera_shake += 10;
+		glider.speed = whitgl_fvec3_scale_val(glider.speed, 0.5);
+		glider.speed.z = -glider.speed.z;
+		glider.pos = glider.last_pos;
+		glider.pos.z += 1;
+	}
 
 	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
@@ -97,13 +135,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.camera_shake += boost_factor*2;
 	}
 
-	if(whitgl_random_float(&glider.shake_seed) > 0.9)
-		glider.target_shake_offset.x = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
-	if(whitgl_random_float(&glider.shake_seed) > 0.9)
-		glider.target_shake_offset.y = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
-	if(whitgl_random_float(&glider.shake_seed) > 0.9)
-		glider.target_shake_offset.z = (whitgl_random_float(&glider.shake_seed)*2-1)/10;
-	glider.shake_offset = whitgl_fvec3_interpolate(glider.shake_offset, glider.target_shake_offset, 0.1);
+
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
@@ -159,7 +191,7 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_sys_draw_iaabb(altimeter_player_speed, altimeter_player_col);
 
 	whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
-	whitgl_float altimeter_ground_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, ground_height/max_altitude);
+	whitgl_float altimeter_ground_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, (ground_height+0.5)/max_altitude);
 	whitgl_iaabb altimeter_ground = {{altimeter_box.a.x, altimeter_ground_pos}, {altimeter_box.b.x, altimeter_box.b.y}};
 	whitgl_sys_color altimeter_ground_col = {0xff,0x00,0x00,0x40};
 	whitgl_sys_draw_iaabb(altimeter_ground, altimeter_ground_col);
