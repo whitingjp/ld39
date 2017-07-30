@@ -21,6 +21,8 @@ void ld39_tower_draw_connections(ld39_tower tower, live_connection_list* live_li
 	whitgl_int off = 0;
 	whitgl_int i;
 	whitgl_fvec3 offset = {0,0,25};
+	// whitgl_fvec3 mid_offset = {0,0,17};
+	// whitgl_float mid_radius = 4;
 	for(i=0; i<tower.num_connections; i++)
 	{
 		whitgl_fvec3 start = whitgl_fvec3_add(tower.pos, offset);

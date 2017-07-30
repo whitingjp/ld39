@@ -40,6 +40,13 @@ whitgl_int _load_shader_piece(const char* filename, char* buffer, whitgl_int buf
 	return read;
 }
 
+whitgl_bool side_of_plane(whitgl_fvec3 a, whitgl_fvec3 point_on_plane, whitgl_fvec3 plane_normal)
+{
+	whitgl_fvec3 direction = whitgl_fvec3_sub(a, point_on_plane);
+	whitgl_float dot = whitgl_fvec3_dot(direction, plane_normal);
+	return dot > 0;
+}
+
 int main()
 {
 	WHITGL_LOG("Starting main.");
@@ -183,6 +190,31 @@ int main()
 					glider.thermal_lift += 0.015;
 				}
 			}
+
+			for(i=0; i<MAX_ACTIVE_MAPS; i++)
+			{
+				if(!world->maps[i].active)
+					continue;
+				ld39_tower tower = world->maps[i].tower;
+				if(!tower.active)
+					continue;
+				whitgl_fvec3 mid_offset = {0,0,17};
+				whitgl_float mid_radius = 4;
+				whitgl_fvec3 mid_pos = whitgl_fvec3_add(tower.pos, mid_offset);
+				whitgl_fvec3 diff = whitgl_fvec3_sub(mid_pos, glider.pos);
+
+				if(whitgl_fvec3_magnitude(diff) > mid_radius)
+					continue;
+
+				whitgl_fvec3 plane_normal = {0,1,0};
+				whitgl_bool side_new = side_of_plane(glider.pos, tower.pos, plane_normal);
+				whitgl_bool side_old = side_of_plane(glider.last_pos, tower.pos, plane_normal);
+				if(side_new == side_old)
+					continue;
+				WHITGL_LOG("YAY");
+			}
+
+
 		}
 		if(running == false)
 			break;

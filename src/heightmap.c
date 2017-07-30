@@ -164,7 +164,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 			tower.pos.x = actual_pos.x;
 			tower.pos.y = actual_pos.y;
 			tower.pos.z = base_height;
-			tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
+			// tower.rotate = noise2d(heightmap->center.x, heightmap->center.y, 8)*whitgl_tau;
 			tower.active = true;
 
 			while(tower.num_connections < MAX_CONNECTIONS)
