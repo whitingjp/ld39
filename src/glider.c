@@ -2,7 +2,10 @@
 
 #include <whitgl/input.h>
 #include <whitgl/logging.h>
+#include <whitgl/sound.h>
 #include <whitgl/sys.h>
+
+#include <assets.h>
 #include <heightmap.h>
 
 
@@ -38,18 +41,20 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	if(!glider.alive)
 	{
 		glider.last_pos = glider.pos;
-		glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/30));
+		glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
 		glider.speed.z -= 0.02;
 		glider.camera_shake = glider.camera_shake*0.95;
 		whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
 		whitgl_float height = glider.pos.z-ground_height;
+		whitgl_float velocity = whitgl_fvec3_magnitude(glider.speed);
 		if(height < 0.5)
 		{
 			glider.speed = whitgl_fvec3_scale_val(glider.speed, 0.5);
 			glider.speed.z = -glider.speed.z;
 			glider.pos = glider.last_pos;
+			if(velocity > 1)
+				whitgl_sound_play(SOUND_CRASH, 0.2, 0.75);
 		}
-		whitgl_float velocity = whitgl_fvec3_magnitude(glider.speed);
 		if(velocity < 0.1) velocity = 0;
 		whitgl_fvec3 pitch_axis = {0,0,1};
 		whitgl_quat pitch = whitgl_quat_rotate(-velocity/32, pitch_axis);
@@ -59,7 +64,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	glider.camera_shake = 0;
 	glider.last_pos = glider.pos;
-	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/30));
+	glider.pos = whitgl_fvec3_add(glider.pos, whitgl_fvec3_scale_val(glider.speed, 1.0/120));
 	glider.pos.z += glider.thermal_lift/120;
 	glider.thermal_lift = glider.thermal_lift*0.99;
 
@@ -92,6 +97,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	whitgl_float drag_factor = height < 4 ? 1 : 0.9998;
 	if(height < 0.5)
 	{
+		whitgl_sound_play(SOUND_CRASH, 1.0, 1.0);
 		glider.alive = false;
 		glider.camera_shake += 10;
 		glider.speed = whitgl_fvec3_scale_val(glider.speed, 0.5);
@@ -125,13 +131,16 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	}
 
 	if(whitgl_input_pressed(WHITGL_INPUT_A) && glider.boost <= 0)
+	{
 		glider.boost = 1.0;
+		whitgl_sound_play(SOUND_BOOST, 1.0, 1.0);
+	}
 
 	if(glider.boost > 0)
 	{
-		glider.boost -= 1.0/120;
+		glider.boost -= 1.0/240;
 		whitgl_float boost_factor = 1-whitgl_fpow(glider.boost*2-1,2);
-		glider.forward_speed += 0.02*boost_factor;
+		glider.forward_speed += 0.01*boost_factor;
 		glider.camera_shake += boost_factor*2;
 	}
 

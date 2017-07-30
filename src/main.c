@@ -156,6 +156,17 @@ int main()
 
 	whitgl_load_model(MDL_TOWER, "data/model/tower.wmd");
 
+	whitgl_loop_add(SOUND_WIND, "data/sound/wind.wav");
+	whitgl_loop_set_paused(SOUND_WIND, false);
+
+	whitgl_loop_add(SOUND_STALL, "data/sound/stall.wav");
+	whitgl_loop_volume(SOUND_STALL, 0.00);
+	whitgl_loop_set_paused(SOUND_STALL, false);
+
+	whitgl_sound_add(SOUND_CRASH, "data/sound/crash.wav");
+	whitgl_sound_add(SOUND_POWER_ON, "data/sound/power_on.wav");
+	whitgl_sound_add(SOUND_BOOST, "data/sound/boost.wav");
+	whitgl_sound_add(SOUND_THERMAL, "data/sound/thermal.wav");
 
 	while(running)
 	{
@@ -250,7 +261,8 @@ int main()
 
 				if(world->connections.num_connections < MAX_LIVE_CONNECTIONS)
 					world->connections.connections[world->connections.num_connections++] = tower.pos;
-				WHITGL_LOG("YAY");
+				// WHITGL_LOG("YAY");
+				whitgl_sound_play(SOUND_POWER_ON, 1.0, 1.0);
 			}
 
 			for(i=0; i<MAX_ACTIVE_MAPS; i++)
@@ -282,6 +294,8 @@ int main()
 				glider.camera_shake += 10;
 				glider.speed = whitgl_fvec3_scale_val(glider.speed, -0.5);
 				glider.pos = glider.last_pos;
+				whitgl_sound_play(SOUND_CRASH, 1.0, 1.0);
+
 			}
 
 			for(i=0; i<MAX_ACTIVE_MAPS; i++)
@@ -313,9 +327,20 @@ int main()
 				glider.camera_shake += 10;
 				glider.speed = whitgl_fvec3_scale_val(glider.speed, -0.5);
 				glider.pos = glider.last_pos;
+				whitgl_sound_play(SOUND_CRASH, 1.0, 1.0);
+
 			}
 
+			whitgl_float air_speed = whitgl_fvec3_magnitude(glider.speed);
+			whitgl_float joystick_speed = whitgl_fvec_magnitude(glider.joystick);
+			whitgl_float factor = air_speed/16+joystick_speed/8;
+			whitgl_loop_frequency(0, 0.2+factor);
+			whitgl_loop_volume(0, (0.2+factor)*0.5);
 
+			if(glider.forward_speed < 2)
+				whitgl_loop_volume(SOUND_STALL, (2-glider.forward_speed)*0.02);
+			else
+				whitgl_loop_volume(SOUND_STALL, 0);
 
 		}
 		if(running == false)
@@ -331,6 +356,7 @@ int main()
 		whitgl_sys_draw_finish();
 
 		frame++;
+
 		// if(time >= 2 && time < 12)
 		// {
 		// if(frame%2)
