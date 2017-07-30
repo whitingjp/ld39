@@ -53,6 +53,9 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	whitgl_fvec3 gravity = {0,0,-1};
 	whitgl_float gravity_dot = whitgl_fvec3_dot(glider.speed, gravity);
+	whitgl_float roll_dot = whitgl_fvec3_dot(up, pitch_axis);
+	whitgl_float roll_descent = (roll_dot-1)/2;
+	glider.speed.z += roll_descent/100;
 
 	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
