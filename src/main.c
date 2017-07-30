@@ -207,6 +207,8 @@ int main()
 					continue;
 
 				whitgl_fvec3 plane_normal = {0,1,0};
+				whitgl_fmat rot = whitgl_fmat_rot_z(tower.rotate);
+				plane_normal = whitgl_fvec3_apply_fmat(plane_normal, rot);
 				whitgl_bool side_new = side_of_plane(glider.pos, tower.pos, plane_normal);
 				whitgl_bool side_old = side_of_plane(glider.last_pos, tower.pos, plane_normal);
 				if(side_new == side_old)
