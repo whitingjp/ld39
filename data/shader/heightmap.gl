@@ -20,7 +20,8 @@ uniform vec4 highcol;
 void main()
 {
 	vec3 normals = fragmentColor;
-	float height = fragmentPosition.z/55.0;
+	float variance = fragmentNormal.x;
+	float height = fragmentPosition.z/55.0+(variance-0.5)/10;
 
 	vec3 ambient = vec3(0.1,0.1,0.2);
 	vec3 sun_dir = normalize(vec3(-0.7,0.1,1.0));

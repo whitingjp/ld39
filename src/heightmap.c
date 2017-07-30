@@ -76,9 +76,9 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 			ld39_triangle t = heightmap->tris[i];
 			whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(t.p[1],t.p[0]), whitgl_fvec3_sub(t.p[2],t.p[0]));
 			normal = whitgl_fvec3_normalize(normal);
-			data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-			data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
-			data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = 0; data[off++] = 0; data[off++] = 0;
+			data[off++] = t.p[0].x; data[off++] = t.p[0].y; data[off++] = t.p[0].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = t.variance; data[off++] = 0; data[off++] = 0;
+			data[off++] = t.p[1].x; data[off++] = t.p[1].y; data[off++] = t.p[1].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = t.variance; data[off++] = 0; data[off++] = 0;
+			data[off++] = t.p[2].x; data[off++] = t.p[2].y; data[off++] = t.p[2].z; data[off++] = normal.x; data[off++] = normal.y; data[off++] = normal.z; data[off++] = t.variance; data[off++] = 0; data[off++] = 0;
 		}
 		whitgl_sys_update_model_from_data(heightmap->model_id, off/9, (char*)data);
 		free(data);
@@ -129,7 +129,7 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 		for(j=0; j<4; j++)
 		{
 			whitgl_int next = (j+1)%4;
-			ld39_triangle triangle = {{mid, corners[j], corners[next]}};
+			ld39_triangle triangle = {{mid, corners[j], corners[next]}, perlin2d(x+0.5,y+0.5,1/13.0,50)};
 			heightmap->tris[heightmap->tri++] = triangle;
 		}
 	}

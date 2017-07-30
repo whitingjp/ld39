@@ -10,6 +10,7 @@ static const whitgl_ivec heightmap_size = {64, 64};
 typedef struct
 {
 	whitgl_fvec3 p[3];
+	whitgl_float variance;
 } ld39_triangle;
 
 typedef struct
