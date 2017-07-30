@@ -106,6 +106,7 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
 	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
+	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_2, 0, glider.pos);
 
 	return glider;
 }

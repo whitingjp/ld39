@@ -13,5 +13,6 @@ void main()
 	accu += texture( tex, Texturepos+vec2( dx/4,-dy/4));
 	accu += texture( tex, Texturepos+vec2(-dx/4, dy/4));
 	accu += texture( tex, Texturepos+vec2( dx/4, dy/4));
-	outColor = accu/4;
+	accu /= 4;
+	outColor = vec4(vec3((accu.r+accu.g+accu.b)/3),1);
 }

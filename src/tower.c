@@ -31,10 +31,12 @@ void ld39_tower_draw_connections(ld39_tower tower, whitgl_fmat view, whitgl_fmat
 		whitgl_fvec3 c = {end.x, end.y, end.z+size};
 		whitgl_fvec3 d = {end.x, end.y, end.z-size};
 
-		whitgl_sys_color thermal_col = {0xf6,0xb1,0x5f,0xff};
-		whitgl_float colr = thermal_col.r/255.0;
-		whitgl_float colg = thermal_col.g/255.0;
-		whitgl_float colb = thermal_col.b/255.0;
+		whitgl_sys_color live_connection_col = {0xef,0x2b,0xa8,0xff};
+		// whitgl_sys_color dead_connection_col = {0xfb,0xd5,0xbb,0x20};
+		whitgl_sys_color connection_col = live_connection_col;
+		whitgl_float colr = connection_col.r/255.0;
+		whitgl_float colg = connection_col.g/255.0;
+		whitgl_float colb = connection_col.b/255.0;
 
 		whitgl_fvec3 normal = whitgl_fvec3_cross(whitgl_fvec3_sub(b,a), whitgl_fvec3_sub(c,a));
 		normal = whitgl_fvec3_normalize(normal);
@@ -59,5 +61,5 @@ void ld39_tower_draw_connections(ld39_tower tower, whitgl_fmat view, whitgl_fmat
 	}
 
 	whitgl_sys_update_model_from_data(MDL_THERMAL, off/9, (char*)data);
-	whitgl_sys_draw_model(MDL_THERMAL, WHITGL_SHADER_EXTRA_1, whitgl_fmat_identity, view, perspective);
+	whitgl_sys_draw_model(MDL_THERMAL, WHITGL_SHADER_EXTRA_2, whitgl_fmat_identity, view, perspective);
 }
