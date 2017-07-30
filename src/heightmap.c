@@ -8,9 +8,11 @@
 
 whitgl_float noise2d(whitgl_int x, whitgl_int y, whitgl_int seed)
 {
-	whitgl_random_seed seed_x = whitgl_random_seed_init(seed+x);
-	whitgl_random_seed seed_y = whitgl_random_seed_init(seed+y*2);
-	whitgl_int new_seed = whitgl_random_int(&seed_x, whitgl_int_max);
+	whitgl_random_seed seed_base = whitgl_random_seed_init(seed+10);
+	whitgl_random_seed seed_x = whitgl_random_seed_init(x);
+	whitgl_random_seed seed_y = whitgl_random_seed_init(whitgl_int_max-y);
+	whitgl_int new_seed = whitgl_random_int(&seed_base, whitgl_int_max);
+	new_seed ^= whitgl_random_int(&seed_x, whitgl_int_max);
 	new_seed ^= whitgl_random_int(&seed_y, whitgl_int_max);
 	whitgl_random_seed sseed = whitgl_random_seed_init(new_seed);
 	return whitgl_fpow(whitgl_random_float(&sseed),2);
@@ -78,6 +80,22 @@ void ld39_heightmap_do_some_generating(ld39_heightmap* heightmap)
 		}
 		whitgl_sys_update_model_from_data(heightmap->model_id, off/9, (char*)data);
 		free(data);
+
+
+		ld39_thermal thermal = ld39_thermal_zero;
+		whitgl_fvec relative = {noise2d(heightmap->center.x, heightmap->center.y, 1)-0.5, noise2d(heightmap->center.x, heightmap->center.y, 2)-0.5};
+		whitgl_fvec offset = whitgl_fvec_scale(relative, whitgl_ivec_to_fvec(heightmap_size));
+		whitgl_fvec actual_pos = whitgl_fvec_add(heightmap->center, offset);
+		whitgl_float base_height = stacked_perlin2d(actual_pos.x,actual_pos.y,0)+2+12*noise2d(heightmap->center.x, heightmap->center.y, 3);
+		thermal.base.x = actual_pos.x;
+		thermal.base.y = actual_pos.y;
+		thermal.base.z = base_height;
+		thermal.radius = 6 + 4*noise2d(actual_pos.x,actual_pos.y,4);
+		thermal.height = 12 + 6*noise2d(actual_pos.x,actual_pos.y,5);
+		thermal.active = true;
+		heightmap->thermal = thermal;
+
+
 		return;
 	}
 
@@ -187,7 +205,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 	}
 }
 
-void ld39_world_draw(whitgl_fmat view, whitgl_fmat perspective)
+void ld39_world_draw(ld39_world* world, whitgl_float time, whitgl_fmat view, whitgl_fmat perspective)
 {
 	whitgl_sys_enable_depth(true);
 
@@ -196,5 +214,10 @@ void ld39_world_draw(whitgl_fmat view, whitgl_fmat perspective)
 	{
 		whitgl_sys_draw_model(i, WHITGL_SHADER_EXTRA_0, whitgl_fmat_identity, view, perspective);
 	}
-
+	for(i=0; i<MAX_ACTIVE_MAPS; i++)
+	{
+		if(!world->maps[i].active)
+			continue;
+		ld39_thermal_draw(world->maps[i].thermal, time, view, perspective);
+	}
 }

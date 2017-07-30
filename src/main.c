@@ -119,12 +119,21 @@ int main()
 			ld39_world_update(world, glider.pos);
 			time += 1.0/60;
 
-			whitgl_fvec glider2d = {glider.pos.x, glider.pos.y};
-			whitgl_fvec base2d = {ld39_thermal_zero.base.x, ld39_thermal_zero.base.y};
-			whitgl_fvec diff = whitgl_fvec_sub(glider2d, base2d);
-			if(whitgl_fvec_magnitude(diff) < ld39_thermal_zero.radius && glider.pos.z > ld39_thermal_zero.base.z && glider.pos.z < ld39_thermal_zero.base.z+ld39_thermal_zero.height)
+			whitgl_int i;
+			for(i=0; i<MAX_ACTIVE_MAPS; i++)
 			{
-				glider.thermal_lift += 0.02;
+				if(!world->maps[i].active)
+					continue;
+				ld39_thermal thermal = world->maps[i].thermal;
+				if(!thermal.active)
+					continue;
+				whitgl_fvec glider2d = {glider.pos.x, glider.pos.y};
+				whitgl_fvec base2d = {thermal.base.x, thermal.base.y};
+				whitgl_fvec diff = whitgl_fvec_sub(glider2d, base2d);
+				if(thermal.active && whitgl_fvec_magnitude(diff) < thermal.radius && glider.pos.z > thermal.base.z && glider.pos.z < thermal.base.z+thermal.height)
+				{
+					glider.thermal_lift += 0.02;
+				}
 			}
 		}
 		if(running == false)
@@ -133,8 +142,7 @@ int main()
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
 		whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup.size.x/(float)setup.size.y, 0.1f, 1024.0f);
 
-		ld39_world_draw(view, perspective);
-		ld39_thermal_draw(ld39_thermal_zero, time, view, perspective);
+		ld39_world_draw(world, time, view, perspective);
 		ld39_glider_draw_meters(glider, setup.size);
 		whitgl_sys_draw_finish();
 

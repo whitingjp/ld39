@@ -4,6 +4,8 @@
 
 void ld39_thermal_draw(ld39_thermal thermal, whitgl_float time, whitgl_fmat view, whitgl_fmat perspective)
 {
+	if(!thermal.active)
+		return;
 	whitgl_float t = whitgl_fwrap(time/(thermal.radius*16),0,1);
 	whitgl_int num_particles = whitgl_fclamp(thermal.height*4, 0, 128);
 	float data[sizeof(float)*128*2*9];
