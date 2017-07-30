@@ -57,9 +57,13 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 	whitgl_float roll_descent = (roll_dot-1)/2;
 	glider.speed.z += roll_descent/100;
 
+	whitgl_float ground_height = stacked_perlin2d(glider.pos.x, glider.pos.y, 0);
+	whitgl_float height = glider.pos.z-ground_height;
+	whitgl_float drag_factor = height < 4 ? 1 : 0.9998;
+
 	whitgl_float old_forward_speed = glider.forward_speed;
 	glider.forward_speed = glider.forward_speed+gravity_dot/512;
-	glider.forward_speed = glider.forward_speed*0.9999;
+	glider.forward_speed = glider.forward_speed*drag_factor;
 	glider.forward_speed -= whitgl_fvec_magnitude(glider.joystick)/5000;
 
 	if(glider.forward_speed > 7)
@@ -157,6 +161,11 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_iaabb altimeter_ground = {{altimeter_box.a.x, altimeter_ground_pos}, {altimeter_box.b.x, altimeter_box.b.y}};
 	whitgl_sys_color altimeter_ground_col = {0xff,0x00,0x00,0x40};
 	whitgl_sys_draw_iaabb(altimeter_ground, altimeter_ground_col);
+
+	whitgl_float altimeter_ground_effect_pos = whitgl_finterpolate(altimeter_box.b.y, altimeter_box.a.y, (ground_height+4)/max_altitude);
+	whitgl_iaabb altimeter_ground_effect = {{altimeter_box.a.x, altimeter_ground_effect_pos}, {altimeter_box.b.x, altimeter_ground_pos}};
+	whitgl_sys_color altimeter_ground_effect_col = {0x00,0xff,0x00,0x40};
+	whitgl_sys_draw_iaabb(altimeter_ground_effect, altimeter_ground_effect_col);
 
 	whitgl_iaabb velocity_box = {{setup_size.x-border-setup_size.x/16, border}, {setup_size.x-border,setup_size.y-border}};
 	whitgl_sys_draw_iaabb(velocity_box, altimeter_bg);
