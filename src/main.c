@@ -57,7 +57,7 @@ int main()
 	setup.size.y = 1080/2;
 	setup.pixel_size = 1;
 	setup.name = "game";
-	setup.fullscreen = false;
+	setup.fullscreen = true;
 	setup.resolution_mode = RESOLUTION_USE_WINDOW;
 	setup.start_focused = !setup.fullscreen;
 
@@ -188,7 +188,19 @@ int main()
 		while(whitgl_timer_should_do_frame(60))
 		{
 			whitgl_input_update();
-			if(!started && whitgl_input_pressed(WHITGL_INPUT_ESC))
+			if(!glider.alive && whitgl_input_pressed(WHITGL_INPUT_ESC))
+			{
+				whitgl_sys_draw_init(0);
+				whitgl_sprite text_sprite = {0, {0,0}, {48,48}};
+				whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*7, setup.size.y/2.0-text_sprite.size.y/2.0};
+				whitgl_sys_draw_text(text_sprite, "loading", title_1);
+				whitgl_sys_draw_finish();
+				glider = ld39_glider_zero;
+				ld39_world_generate(world, glider.pos);
+				started = false;
+				continue;
+			}
+			else if(!started && whitgl_input_pressed(WHITGL_INPUT_ESC))
 				running = false;
 			if(whitgl_input_pressed(WHITGL_INPUT_ESC))
 				started = false;
