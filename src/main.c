@@ -120,7 +120,7 @@ int main()
 	connection_shader.uniforms[0].name = "eye";
 	connection_shader.uniforms[1].type = WHITGL_UNIFORM_COLOR;
 	connection_shader.uniforms[1].name = "skycol";
-	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_2, thermal_shader))
+	if(!whitgl_change_shader(WHITGL_SHADER_EXTRA_2, connection_shader))
 		WHITGL_PANIC("failed to change shader");
 
 	// whitgl_sys_color sky = {0x1e,0x21,0x55,0xff};
@@ -145,6 +145,14 @@ int main()
 	whitgl_input_init();
 	WHITGL_LOG("Initiating timer");
 	whitgl_timer_init();
+
+	whitgl_sys_add_image(0, "data/sprites/sprites.png");
+
+	whitgl_sys_draw_init(0);
+	whitgl_sprite text_sprite = {0, {0,0}, {48,48}};
+	whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*7, setup.size.y/2.0-text_sprite.size.y/2.0};
+	whitgl_sys_draw_text(text_sprite, "loading", title_1);
+	whitgl_sys_draw_finish();
 
 	ld39_world *world = malloc(sizeof(ld39_world));
 	ld39_glider glider = ld39_glider_zero;
@@ -179,7 +187,7 @@ int main()
 	whitgl_sound_add(SOUND_BOOST, "data/sound/boost.wav");
 	whitgl_sound_add(SOUND_THERMAL, "data/sound/thermal.wav");
 
-	whitgl_sys_add_image(0, "data/sprites/sprites.png");
+
 
 	while(running)
 	{
@@ -448,7 +456,7 @@ int main()
 			// whitgl_sys_draw_text(text_sprite, "score", title_1);
 
 			char buffer[1024];
-			snprintf(buffer, 1024, "score %lld", world->connections.num_connections);
+			snprintf(buffer, 1024, "score %d", (int)world->connections.num_connections);
 			whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*strlen(buffer), 16*2+off_y};
 			// whitgl_ivec title_2 = {setup.size.x/2-(text_sprite.size.x/2.0)*strlen(buffer), 16*2+16+text_sprite.size.y+off_y};
 			whitgl_sys_draw_text(text_sprite, buffer, title_1);

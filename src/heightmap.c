@@ -152,7 +152,7 @@ void ld39_world_generate(ld39_world* world, whitgl_fvec3 glider_pos)
 }
 void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 {
-	if(world->maps[world->current_gen].active)
+	if(world->current_gen >= 0 && world->maps[world->current_gen].active)
 	{
 		ld39_heightmap* heightmap = &world->maps[world->current_gen];
 		ld39_tower tower = ld39_tower_zero;
@@ -197,7 +197,7 @@ void ld39_world_update(ld39_world* world, whitgl_fvec3 glider_pos)
 			}
 		}
 	}
-	if(world->maps[world->current_gen].active || world->current_gen < 0)
+	if( world->current_gen < 0 || world->maps[world->current_gen].active)
 	{
 		whitgl_bool first_ever = world->current_gen < 0;
 		// find the furthest existing
