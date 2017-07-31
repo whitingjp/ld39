@@ -148,10 +148,6 @@ ld39_glider ld39_glider_update(ld39_glider glider)
 		glider.camera_shake += boost_factor*2;
 	}
 
-	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
-	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
-	whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_2, 0, glider.pos);
-
 	return glider;
 }
 whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider)

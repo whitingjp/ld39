@@ -156,6 +156,9 @@ int main()
 	whitgl_int frame = 0;
 	// whitgl_profile_should_report(true);
 
+	whitgl_bool started = false;
+	whitgl_float off = 0;
+
 	whitgl_random_seed thermal_seed = whitgl_random_seed_init(2515);
 
 	whitgl_load_model(MDL_TOWER, "data/model/tower.wmd");
@@ -176,6 +179,8 @@ int main()
 	whitgl_sound_add(SOUND_BOOST, "data/sound/boost.wav");
 	whitgl_sound_add(SOUND_THERMAL, "data/sound/thermal.wav");
 
+	whitgl_sys_add_image(0, "data/sprites/sprites.png");
+
 	while(running)
 	{
 		whitgl_sound_update();
@@ -189,8 +194,20 @@ int main()
 				running = false;
 			if(running == false)
 				break;
-			glider = ld39_glider_update(glider);
+
 			ld39_world_update(world, glider.pos);
+
+			if(!started && whitgl_input_pressed(WHITGL_INPUT_A))
+			{
+				started = true;
+				continue;
+			}
+			if(!started)
+				continue;
+
+			off += 1.0/60.0;
+			glider = ld39_glider_update(glider);
+
 			time += 1.0/60;
 
 			whitgl_int i;
@@ -388,14 +405,26 @@ int main()
 		}
 		if(running == false)
 			break;
+
+		whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_0, 0, glider.pos);
+		whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_1, 0, glider.pos);
+		whitgl_set_shader_fvec3(WHITGL_SHADER_EXTRA_2, 0, glider.pos);
+
 		whitgl_sys_draw_init(0);
 		whitgl_fmat view = ld39_glider_onboard_camera(glider);
 		whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup.size.x/(float)setup.size.y, 0.1f, 1024.0f);
 
 		ld39_world_draw(world, time, view, perspective);
+		if(started)
+			ld39_glider_draw_meters(glider, setup.size);
 
-
-		ld39_glider_draw_meters(glider, setup.size);
+		whitgl_float off_y = -setup.size.y*whitgl_fpow(off,2);
+		whitgl_sprite text_sprite = {0, {0,0}, {5*16,5*16}};
+		whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*8, 16*2+off_y};
+		whitgl_sys_draw_text(text_sprite, "zephyria", title_1);
+		whitgl_ivec title_2 = {setup.size.x/2-(text_sprite.size.x/2.0)*6, 16*2+16+text_sprite.size.y+off_y};
+		whitgl_sys_draw_text(text_sprite, "planum", title_2);
+ // Planum
 		whitgl_sys_draw_finish();
 
 		frame++;
