@@ -188,14 +188,21 @@ int main()
 		while(whitgl_timer_should_do_frame(60))
 		{
 			whitgl_input_update();
-			if(whitgl_input_pressed(WHITGL_INPUT_ESC))
+			if(!started && whitgl_input_pressed(WHITGL_INPUT_ESC))
 				running = false;
+			if(whitgl_input_pressed(WHITGL_INPUT_ESC))
+				started = false;
 			if(whitgl_sys_should_close())
 				running = false;
 			if(running == false)
 				break;
 
 			ld39_world_update(world, glider.pos);
+
+			if(glider.alive && started)
+				off = whitgl_fclamp(off+1.0/30.0,0,1);
+			else
+				off = whitgl_fclamp(off-1.0/15.0,0,1);
 
 			if(!started && whitgl_input_pressed(WHITGL_INPUT_A))
 			{
@@ -205,10 +212,6 @@ int main()
 			if(!started)
 				continue;
 
-			if(glider.alive)
-				off = whitgl_fclamp(off+1.0/60.0,0,1);
-			else
-				off = whitgl_fclamp(off-1.0/60.0,0,1);
 			glider = ld39_glider_update(glider);
 
 			time += 1.0/60;
@@ -418,8 +421,7 @@ int main()
 		whitgl_fmat perspective = whitgl_fmat_perspective(whitgl_tau/4, (float)setup.size.x/(float)setup.size.y, 0.1f, 1024.0f);
 
 		ld39_world_draw(world, time, view, perspective);
-		if(started)
-			ld39_glider_draw_meters(glider, setup.size);
+		ld39_glider_draw_meters(glider, 1-off, setup.size);
 
 		whitgl_sprite text_sprite = {0, {0,0}, {48,48}};
 		whitgl_float off_y = -setup.size.y*whitgl_fpow(off,2);

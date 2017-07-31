@@ -174,11 +174,13 @@ whitgl_fmat ld39_glider_onboard_camera(ld39_glider glider)
 	return view;
 }
 
-void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
+void ld39_glider_draw_meters(ld39_glider glider, whitgl_float off, whitgl_ivec setup_size)
 {
+
 	whitgl_sys_enable_depth(false);
 	whitgl_int border = setup_size.x/32;
-	whitgl_iaabb altimeter_box = {{border, border}, {setup_size.x/16+border,setup_size.y-border}};
+	off *= border*8;
+	whitgl_iaabb altimeter_box = {{border-off, border}, {setup_size.x/16+border-off,setup_size.y-border}};
 	whitgl_sys_color altimeter_bg = {0xff,0xff,0xff,0x40};
 	whitgl_sys_draw_iaabb(altimeter_box, altimeter_bg);
 
@@ -208,7 +210,7 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	whitgl_sys_color altimeter_ground_effect_col = {0x00,0xff,0x00,0x40};
 	whitgl_sys_draw_iaabb(altimeter_ground_effect, altimeter_ground_effect_col);
 
-	whitgl_iaabb velocity_box = {{setup_size.x-border-setup_size.x/16, border}, {setup_size.x-border,setup_size.y-border}};
+	whitgl_iaabb velocity_box = {{setup_size.x-border-setup_size.x/16+off, border}, {setup_size.x-border+off,setup_size.y-border}};
 	whitgl_sys_draw_iaabb(velocity_box, altimeter_bg);
 	whitgl_float max_velocity = 8;
 	whitgl_float velocity_pos = whitgl_finterpolate(velocity_box.b.y, velocity_box.a.y, glider.forward_speed/max_velocity);
@@ -241,7 +243,7 @@ void ld39_glider_draw_meters(ld39_glider glider, whitgl_ivec setup_size)
 	for(i=0; i<3; i++)
 	{
 		whitgl_float boost_divider = setup_size.x/8;
-		whitgl_fcircle circle = {{boost_divider*(i+3), setup_size.y-setup_size.y/8}, setup_size.y/16};
+		whitgl_fcircle circle = {{boost_divider*(i+3), setup_size.y-setup_size.y/8+off}, setup_size.y/16};
 		whitgl_sys_draw_fcircle(circle, altimeter_bg, 32);
 
 		whitgl_sys_color live_connection_col = {0xef,0x2b,0xa8,0x80};
