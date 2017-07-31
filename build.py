@@ -8,4 +8,4 @@ import build
 sys.path.insert(0, 'input')
 import ninja_syntax
 
-build.do_game('Game', '', ['png','ogg','gl','obj','wav'])
+build.do_game('Zephyria', '', ['png','ogg','gl','obj','wav'])

@@ -56,7 +56,7 @@ int main()
 	setup.size.x = 1920/2;
 	setup.size.y = 1080/2;
 	setup.pixel_size = 1;
-	setup.name = "game";
+	setup.name = "zephyria";
 	setup.fullscreen = true;
 	setup.resolution_mode = RESOLUTION_USE_WINDOW;
 	setup.start_focused = !setup.fullscreen;
