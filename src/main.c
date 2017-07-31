@@ -205,7 +205,10 @@ int main()
 			if(!started)
 				continue;
 
-			off += 1.0/60.0;
+			if(glider.alive)
+				off = whitgl_fclamp(off+1.0/60.0,0,1);
+			else
+				off = whitgl_fclamp(off-1.0/60.0,0,1);
 			glider = ld39_glider_update(glider);
 
 			time += 1.0/60;
@@ -418,14 +421,26 @@ int main()
 		if(started)
 			ld39_glider_draw_meters(glider, setup.size);
 
+		whitgl_sprite text_sprite = {0, {0,0}, {48,48}};
 		whitgl_float off_y = -setup.size.y*whitgl_fpow(off,2);
-		whitgl_sprite text_sprite = {0, {0,0}, {5*16,5*16}};
-		whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*8, 16*2+off_y};
-		whitgl_sys_draw_text(text_sprite, "zephyria", title_1);
-		whitgl_ivec title_2 = {setup.size.x/2-(text_sprite.size.x/2.0)*6, 16*2+16+text_sprite.size.y+off_y};
-		whitgl_sys_draw_text(text_sprite, "planum", title_2);
- // Planum
+		if(glider.alive)
+		{
+			whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*8, 16*2+off_y};
+			whitgl_sys_draw_text(text_sprite, "zephyria", title_1);
+			whitgl_ivec title_2 = {setup.size.x/2-(text_sprite.size.x/2.0)*6, 16*2+16+text_sprite.size.y+off_y};
+			whitgl_sys_draw_text(text_sprite, "planum", title_2);
+		} else
+		{
+			// whitgl_sys_draw_text(text_sprite, "score", title_1);
+
+			char buffer[1024];
+			snprintf(buffer, 1024, "score %lld", world->connections.num_connections);
+			whitgl_ivec title_1 = {setup.size.x/2-(text_sprite.size.x/2.0)*strlen(buffer), 16*2+off_y};
+			// whitgl_ivec title_2 = {setup.size.x/2-(text_sprite.size.x/2.0)*strlen(buffer), 16*2+16+text_sprite.size.y+off_y};
+			whitgl_sys_draw_text(text_sprite, buffer, title_1);
+		}
 		whitgl_sys_draw_finish();
+
 
 		frame++;
 
